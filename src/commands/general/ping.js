@@ -1,18 +1,17 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-
-const wait = require('util').promisify(setTimeout);
+const { neturalEmbed } = require('../../objects/embed.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('ping')
 		.setDescription('Replies with Pong!'),
 	async execute(interaction) {
-		await interaction.reply('Pong!')
+		let embed = neturalEmbed("Pong!", "Replied with Pong!");
+		await interaction.reply({ embeds: [embed.embed], files: embed.files })
 			.catch((err) => {console.error(err);});
 
-		await wait(100);
-
-		await interaction.followUp('Pong Again!')
+		embed = neturalEmbed('Pong Again!', "Pong Pong Pong Pong Pong!");
+		await interaction.followUp({ embeds: [embed.embed], files: embed.files })
 			.catch((err) => {console.error(err);});
 	},
 };

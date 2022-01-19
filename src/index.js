@@ -43,3 +43,5 @@ getFiles('./src/events')
 	.catch(e => console.error(e));
 
 client.login(process.env.TOKEN);
+
+module.exports = client;

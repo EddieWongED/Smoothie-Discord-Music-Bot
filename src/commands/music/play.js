@@ -1,9 +1,10 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const ytdl = require('ytdl-core');
 const { createAudioResource } = require('@discordjs/voice');
-const { connect, ConnectionStatus, player } = require('../../objects/subscription.js');
+const { connect, ConnectionStatus } = require('../../objects/subscription.js');
+
 const { queueMusic, QueueVideoStatus } = require('../../utils/queueURL.js');
-const wait = require('util').promisify(setTimeout);
+const { loadingEmbed, errorEmbed, successEmbed } = require('../../objects/embed.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -19,73 +20,74 @@ module.exports = {
 				.setDescription('Plays the music immediately if the URL is a video. A playlist does no effect.')
 				.setRequired(true)),
 	async execute(interaction) {
-		await interaction.deferReply()
+		let embed = loadingEmbed('Attempting to play music...', 'Please be patient...');
+		await interaction.reply({ embeds: [embed.embed], files: embed.files })
 			.catch((err) => {console.error(err);});
-		
-		wait(100);
 
 		let followUp = false;
 		let followUpMessage = null;
 
-		switch (connect(interaction)) {
+		const connectionStatus = await connect(interaction.guildId, interaction.member.voice.channel);
+
+		switch (connectionStatus) {
 		case ConnectionStatus.SUCCESS:
-			await interaction.editReply('Smoothie joined the voice channel.')
+			embed = successEmbed('Smoothie joined the voice channel.', 'Please welcome her! She is a shy girl.');
+			await interaction.editReply({ embeds: [embed.embed], files: embed.files })
 				.catch((err) => {console.error(err);});
 			followUp = true;
 			break;
 		case ConnectionStatus.SUCCESS_ALREADY_JOINED:
 			break;
 		case ConnectionStatus.SUCCESS_JOINED_FROM_OTHER_CHANNEL:
-			await interaction.editReply('Smoothie joined from another voice channel.')
+			embed = successEmbed('Smoothie joined from another voice channel.', 'Please welcome her! She is a shy girl.');
+			await interaction.editReply({ embeds: [embed.embed], files: embed.files })
 				.catch((err) => {console.error(err);});
 			followUp = true;
 			break;
 		case ConnectionStatus.ERROR_NOT_IN_CHANNEL:
-			await interaction.editReply('You are not in a voice channel dumbass!')
+			embed = errorEmbed('You are not in a voice channel!', 'dumbass.');
+			await interaction.editReply({ embeds: [embed.embed], files: embed.files })
 				.catch((err) => {console.error(err);});
 			return;
 		default:
-			await interaction.editReply('Unknown error occurred!')
+			embed = errorEmbed('Unknown error occurred!', 'A problem that the developer do not know wtf just happened.');
+			await interaction.editReply({ embeds: [embed.embed], files: embed.files })
 				.catch((err) => {console.error(err);});
 			return;
 		}
 
-		wait(100);
+		embed = loadingEmbed('Loading the music...', 'Please be patient.');
 
 		if (followUp) {
-			followUpMessage = await interaction.followUp('Loading the music...')
+			followUpMessage = await interaction.followUp({ embeds: [embed.embed], files: embed.files })
 				.catch((err) => {console.error(err);});
 		}
 		else {
-			await interaction.editReply('Loading the music...')
+			await interaction.editReply({ embeds: [embed.embed], files: embed.files })
 				.catch((err) => {console.error(err);});
 		}
-
-		wait(100);
 		
 		const url = interaction.options.getString('url');
 
-		let msg = "An unexcepted error occurred";
-
-		const status = await queueMusic(url);
+		const status = await queueMusic(interaction.guildId, url);
 		
 		switch (status) {
 			case QueueVideoStatus.SUCCESS:
-				msg = "Queued the music.";
+				embed = successEmbed('Queued the music.', 'Enjoy the music.');
 				break;
 			case QueueVideoStatus.ERROR_INVALID_URL:
-				msg = "Invlid URL!";
+				embed = errorEmbed('Invalid URL!', 'Please check if the provided URL is valid or not.');
 				break;
 			case QueueVideoStatus.ERROR_ALREADY_EXIST:
-				msg = "The music was already in the queue!";
+				embed = errorEmbed('The music was already in the queue!', 'Dumbass.');
 				break;
 		};
 
 		if (followUp) {
-			followUpMessage.edit(msg)
+			followUpMessage.edit({ embeds: [embed.embed], files: embed.files })
 				.catch((err) => {console.error(err);});
 		} else {
-			await interaction.editReply(msg)
+			await interaction.editReply({ embeds: [embed.embed], files: embed.files })
 					.catch((err) => {console.error(err);});
 		}
 	},

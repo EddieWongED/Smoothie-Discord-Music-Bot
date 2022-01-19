@@ -1,30 +1,26 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
-const { queue } = require('../../objects/subscription.js');
-const wait = require('util').promisify(setTimeout);
+const { loadingEmbed, neturalEmbed } = require('../../objects/embed.js');
+const { retrieveData } = require('../../utils/changeData.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('queue')
 		.setDescription('Shows what\'s next.'),
 	async execute(interaction) {
-		await interaction.deferReply()
+		let embed = loadingEmbed('Attempting to load the queue...', 'Please be patient...');
+		await interaction.reply({ embeds: [embed.embed], files: embed.files })
 			.catch((err) => {console.error(err);});
 
-		wait(100);
+		const queue = await retrieveData(interaction.guildId, 'queue');
 
 		let des = '```CSS\n';
 		for (let i = 0; i < 10; i++) {
 			des = `${des}${i + 1}: ${queue[i]['title']} \n`;
 		}
 		des = des + '```';
-		const queueEmbed = new MessageEmbed()
-			.setColor('#0099ff')
-			.setTitle('Queue')
-			.setDescription(des)
-			.setFooter({ text: 'Smoothie' });
+		embed = neturalEmbed('Queue', des);
 
-		const channel = await interaction.editReply({ embeds: [queueEmbed] })
+		await interaction.editReply({ embeds: [embed.embed], files: embed.files })
 			.catch((err) => {console.error(err);});
 	},
 };

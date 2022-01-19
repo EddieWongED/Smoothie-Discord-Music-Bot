@@ -1,7 +1,7 @@
-const { getVoiceConnection, joinVoiceChannel, createAudioPlayer, NoSubscriberBehavior, AudioPlayerStatus, createAudioResource } = require('@discordjs/voice');
+const { getVoiceConnection, joinVoiceChannel, createAudioPlayer, NoSubscriberBehavior, AudioPlayerStatus, createAudioResource, VoiceConnectionStatus, entersState } = require('@discordjs/voice');
 const ytdl = require('ytdl-core');
-
-const queue = [];
+const cacheData = require('../../data/cacheData.js');
+const { retrieveData, setData } = require('../utils/changeData.js');
 
 const ConnectionStatus = {
   SUCCESS: 0,
@@ -11,14 +11,12 @@ const ConnectionStatus = {
   ERROR_UNKNOWN: 4
 }
 
-function connect(interaction) {
-  const memberVoiceChannel = interaction.member.voice.channel;
-
+const connect = async (guildId, memberVoiceChannel) => {
   if (!memberVoiceChannel) {
     return ConnectionStatus.ERROR_NOT_IN_CHANNEL;
   }
 
-  var connection = getVoiceConnection(interaction.guild.id);
+  var connection = getVoiceConnection(guildId);
 
   if (connection === undefined) {
     connection = joinVoiceChannel({
@@ -27,8 +25,42 @@ function connect(interaction) {
         adapterCreator: memberVoiceChannel.guild.voiceAdapterCreator
     });
 
+    const player = createAudioPlayer({
+      behaviors: {
+        noSubscriber: NoSubscriberBehavior.Pause,
+      },
+    });
+
+    player.on(AudioPlayerStatus.Playing, (obj) => {
+      console.log(`Playing: ${obj.resource.metadata.title}`);
+      // const channel = client.channels.cache.get()
+    });
+
+    player.on(AudioPlayerStatus.Idle, (audio) => {
+      audio.resource.retry = 0;
+      console.log('The audio player has started idling!');
+      
+      getNextResource(guildId).then((resource) => {
+        player.play(resource);
+      });
+    });
+
+    player.on('error', error => {
+      console.error(`Error: ${error.resource.metadata.title}` );
+      if (error.resource.metadata.retry < 3) {
+        error.resource.metadata.retry++;
+        player.play(error.resource);
+      } else {
+        getNextResource(guildId).then((resource) => {
+          player.play(resource);
+        });
+      }
+    });
+
+
+    cacheData['player'][guildId] = player;
     connection.subscribe(player);
-  
+
     return ConnectionStatus.SUCCESS;
 
   } 
@@ -40,8 +72,41 @@ function connect(interaction) {
         adapterCreator: memberVoiceChannel.guild.voiceAdapterCreator
     });
 
+    const player = createAudioPlayer({
+      behaviors: {
+        noSubscriber: NoSubscriberBehavior.Pause,
+      },
+    });
+
+    player.on(AudioPlayerStatus.Playing, (obj) => {
+      console.log(`Playing: ${obj.resource.metadata.title}`);
+      // const channel = client.channels.cache.get()
+    });
+
+    player.on(AudioPlayerStatus.Idle, (audio) => {
+      audio.resource.retry = 0;
+      console.log('The audio player has started idling!');
+      
+      getNextResource(guildId).then((resource) => {
+        player.play(resource);
+      });
+    });
+
+    player.on('error', error => {
+      console.error(`Error: ${error.resource.metadata.title}` );
+      if (error.resource.metadata.retry < 3) {
+        error.resource.metadata.retry++;
+        player.play(error.resource);
+      } else {
+        getNextResource(guildId).then((resource) => {
+          player.play(resource);
+        });
+      }
+    });
+
+    cacheData['player'][guildId] = player;
     connection.subscribe(player);
-    
+
     return ConnectionStatus.SUCCESS_JOINED_FROM_OTHER_CHANNEL;
   }
 
@@ -53,41 +118,39 @@ function connect(interaction) {
   return ConnectionStatus.ERROR_UNKNOWN;
 }
 
-function getNextResource() {
+const getNextResource = async (guildId) => {
+  
+  const queue = await retrieveData(guildId, 'queue');
+
   if (queue.length != 0) {
     const first = queue.shift();
     queue.push(first);
     const url = queue[0]['url'];
     const title = queue[0]['title'];
+
+    const status = await setData(guildId, 'queue', queue);
+    if (!status) {
+      console.log('An error of saving queue to guildData.json occurred.');
+      
+      return null;
+    }
+
+    const resource = await createResource(url, title);
+    return resource;
+  }
+}
+
+const createResource = async (url, title) => {
     const stream = ytdl(url, { filter: 'audioonly',
                               quality: "highestaudio",});
 
     return resource = createAudioResource(stream, {
       metadata: {
-        title: title
-      }
+        title: title,
+        url: url,
+        retry: 0,
+      },
     });
-  }
 }
 
-const player = createAudioPlayer({
-	behaviors: {
-		noSubscriber: NoSubscriberBehavior.Pause,
-	},
-});
-
-player.on(AudioPlayerStatus.Playing, (obj) => {
-	console.log(`Playing: ${obj.resource.metadata.title}`);
-});
-
-player.on(AudioPlayerStatus.Idle, () => {
-	console.log('The audio player has started idling!');
-  player.play(getNextResource());
-});
-
-player.on('error', error => {
-	console.error(`Error: ${error.resource.metadata.title}` );
-	player.play(getNextResource());
-});
-
-module.exports = { queue, player, getNextResource, ConnectionStatus, connect};
+module.exports = { getNextResource, createResource, ConnectionStatus, connect};

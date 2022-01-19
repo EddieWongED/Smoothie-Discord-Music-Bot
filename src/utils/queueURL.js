@@ -1,15 +1,18 @@
 const ytdl = require('ytdl-core');
 const youtubedl = require('youtube-dl-exec');
-const { queue, player } = require('../objects/subscription.js');
-const { getNextResource } = require('../objects/subscription.js');
+const { createResource } = require('../objects/subscription.js');
+const cacheData = require('../../data/cacheData.js');
+const { AudioPlayerStatus } = require('@discordjs/voice');
+const { retrieveData, setData } = require('../utils/changeData.js');
 
 const QueueVideoStatus = {
 	SUCCESS: 0,
 	ERROR_INVALID_URL: 1,
-	ERROR_ALREADY_EXIST: 2
+	ERROR_ALREADY_EXIST: 2,
+	ERROR_UNKNOWN: 3
 }
 
-const queueMusic = async (url) => {
+const queueMusic = async (guildId, url) => {
 	const videoInfo = await ytdl.getBasicInfo(url, []);
 	const title = videoInfo.videoDetails.title;
 
@@ -17,14 +20,28 @@ const queueMusic = async (url) => {
 		return QueueVideoStatus.ERROR_INVALID_URL;
 	}
 
+	const queue = await retrieveData(guildId, 'queue');
+
 	if (!queue.some(e => e['url'] === url)) {
 		queue.push({
 			title: title,
 			url: url
 		});
 
-		if (queue.length === 1) {
-			player.play(getNextResource());
+		const status = await setData(interaction.guildId, 'queue', queue);
+		if (!status) {
+			console.log('An error of saving queue to guildData.json occurred.');
+			
+			return QueueVideoStatus.ERROR_UNKNOWN;
+		}
+
+		const player = cacheData['player'][guildId];
+
+		if (queue.length >= 1 && player.state.status == AudioPlayerStatus.Idle) {
+			const resource = await createResource(queue[0]['url'], queue[0]['title']);
+			if (resource != null) {
+				player.play(resource);
+			}
 		}
 
 		return QueueVideoStatus.SUCCESS;
@@ -33,7 +50,7 @@ const queueMusic = async (url) => {
 	}
 }
 
-const queuePlaylist = async (url) => {
+const queuePlaylist = async (guildId, url) => {
 	const output = await youtubedl(url, {
 		flatPlaylist: true,
 		dumpSingleJson: true,
@@ -51,6 +68,8 @@ const queuePlaylist = async (url) => {
 	let noOfVideo = 0;
 	let noOfRepeated = 0;
 
+	const queue = await retrieveData(guildId, 'queue');
+
 	for (const video of output['entries']) {
 		const videoURL = 'https://www.youtube.com/watch?v=' + video['id'];
 		const title = video['title'];
@@ -62,15 +81,27 @@ const queuePlaylist = async (url) => {
 					title: title,
 					url: videoURL,
 				});
-
-				if (queue.length === 1) {
-					player.play(getNextResource());
-				}
 			} else {
 				noOfRepeated++;
 			}
 		} else {
 			noOfError++;
+		}
+	}
+
+	const status = await setData(guildId, 'queue', queue);
+	if (!status) {
+			console.log('An error of saving queue to guildData.json occurred.');
+		
+			return QueueVideoStatus.ERROR_UNKNOWN;
+	}
+
+	const player = cacheData['player'][guildId];
+
+	if (queue.length >= 1 && player.state.status == AudioPlayerStatus.Idle) {
+		const resource = await createResource(queue[0]['url'], queue[0]['title']);
+		if (resource != null) {
+			player.play(resource);
 		}
 	}
 
