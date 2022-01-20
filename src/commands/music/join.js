@@ -23,6 +23,11 @@ module.exports = {
 			await interaction.editReply({ embeds: [embed.embed], files: embed.files })
 				.catch((err) => {console.error(err);});
 			break;
+		case ConnectionStatus.SUCCESS_ALREADY_JOINED:
+			embed = errorEmbed('Smoothie was already in your voice channel.', 'Did you not notice it?');
+			await interaction.editReply({ embeds: [embed.embed], files: embed.files })
+				.catch((err) => {console.error(err);});
+			return;
 		case ConnectionStatus.SUCCESS_JOINED_FROM_OTHER_CHANNEL:
 			embed = successEmbed('Smoothie joined from another voice channel.', 'Please welcome her! She is a shy girl.');
 			await interaction.editReply({ embeds: [embed.embed], files: embed.files })

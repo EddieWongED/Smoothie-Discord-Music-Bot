@@ -1,14 +1,101 @@
-const { getVoiceConnection, joinVoiceChannel, createAudioPlayer, NoSubscriberBehavior, AudioPlayerStatus, createAudioResource, VoiceConnectionStatus, entersState } = require('@discordjs/voice');
+const { getVoiceConnection, joinVoiceChannel, createAudioPlayer, NoSubscriberBehavior, AudioPlayerStatus, createAudioResource } = require('@discordjs/voice');
 const ytdl = require('ytdl-core');
 const cacheData = require('../../data/cacheData.js');
 const { retrieveData, setData } = require('../utils/changeData.js');
-
+const client = require('../index.js');
+const { playingNowEmbed } = require('../objects/embed.js')
 const ConnectionStatus = {
   SUCCESS: 0,
   SUCCESS_ALREADY_JOINED: 1,
   SUCCESS_JOINED_FROM_OTHER_CHANNEL: 2,
   ERROR_NOT_IN_CHANNEL: 3,
   ERROR_UNKNOWN: 4
+}
+
+const isSameVoiceChannel = (guildId, memberVoiceChannel) => {
+    if (memberVoiceChannel) {
+      const connection = getVoiceConnection(guildId);
+      if (connection) {
+        if (memberVoiceChannel.id === connection.joinConfig.channelId)
+        {
+          return true;
+        }
+      }
+    } 
+
+    return false;
+}
+
+const startConnecting = async (guildId, memberVoiceChannel) => {
+  const connection = joinVoiceChannel({
+      channelId: memberVoiceChannel.id,
+      guildId: memberVoiceChannel.guild.id,
+      adapterCreator: memberVoiceChannel.guild.voiceAdapterCreator
+  });
+
+  const player = createAudioPlayer({
+    behaviors: {
+      noSubscriber: NoSubscriberBehavior.Pause,
+    },
+  });
+
+  player.on(AudioPlayerStatus.Playing, async (obj) => {
+    console.log(`${client.guilds.cache.get(guildId).name} is playing: ${obj.resource.metadata.title}`);
+    const channelId = await retrieveData(guildId, 'respondChannelId');
+    if (channelId) {
+      const channel = client.channels.cache.get(channelId);
+      if (channel) {
+          const playingNowMessageId = await retrieveData(guildId, 'playingNowMessageId');
+          if (playingNowMessageId != null) {
+            const message = channel.messages.cache.get(playingNowMessageId);
+            if (message) {
+              const content = await message.delete();
+            } else {
+              console.log('Cannot find the message to be deleted.');
+            }  
+          }
+
+          const embed = await playingNowEmbed(guildId);
+          const message = await channel.send({ embeds: [embed.embed], files: embed.files });
+          if (message) {
+            const status = await setData(guildId, 'playingNowMessageId', message.id);
+            if (!status) {
+              console.log('Failed to save playingNowMessageId.');
+            }
+          } else {
+            console.log('Cannot send the message properly.');
+          }
+      } else {
+        console.log('Cannot find a proper channel to send the playing now message!');
+      }
+    } else {
+      console.log('Cannot find a proper channel to send the playing now message!');
+    }
+  });
+
+  player.on(AudioPlayerStatus.Idle, async (audio) => {
+    const resource = await getNextResource(guildId);
+
+    if (resource) {
+      player.play(resource);
+    } else {
+      console.log('Unable to find the resource.');
+    }
+  });
+
+  player.on('error', async (error) => {
+    console.error(`Error: ${error.resource.metadata.title} ${error}` );
+    const resource = await getNextResource(guildId);
+
+    if (resource) {
+      player.play(resource);
+    } else {
+      console.log('Unable to find the resource.');
+    }
+  });
+
+  cacheData['player'][guildId] = player;
+  connection.subscribe(player);
 }
 
 const connect = async (guildId, memberVoiceChannel) => {
@@ -19,93 +106,13 @@ const connect = async (guildId, memberVoiceChannel) => {
   var connection = getVoiceConnection(guildId);
 
   if (connection === undefined) {
-    connection = joinVoiceChannel({
-        channelId: memberVoiceChannel.id,
-        guildId: memberVoiceChannel.guild.id,
-        adapterCreator: memberVoiceChannel.guild.voiceAdapterCreator
-    });
-
-    const player = createAudioPlayer({
-      behaviors: {
-        noSubscriber: NoSubscriberBehavior.Pause,
-      },
-    });
-
-    player.on(AudioPlayerStatus.Playing, (obj) => {
-      console.log(`Playing: ${obj.resource.metadata.title}`);
-      // const channel = client.channels.cache.get()
-    });
-
-    player.on(AudioPlayerStatus.Idle, (audio) => {
-      audio.resource.retry = 0;
-      console.log('The audio player has started idling!');
-      
-      getNextResource(guildId).then((resource) => {
-        player.play(resource);
-      });
-    });
-
-    player.on('error', error => {
-      console.error(`Error: ${error.resource.metadata.title}` );
-      if (error.resource.metadata.retry < 3) {
-        error.resource.metadata.retry++;
-        player.play(error.resource);
-      } else {
-        getNextResource(guildId).then((resource) => {
-          player.play(resource);
-        });
-      }
-    });
-
-
-    cacheData['player'][guildId] = player;
-    connection.subscribe(player);
+    startConnecting(guildId, memberVoiceChannel);
 
     return ConnectionStatus.SUCCESS;
-
   } 
   
   if (memberVoiceChannel.id !== connection.joinConfig.channelId) {
-    connection = joinVoiceChannel({
-        channelId: memberVoiceChannel.id,
-        guildId: memberVoiceChannel.guild.id,
-        adapterCreator: memberVoiceChannel.guild.voiceAdapterCreator
-    });
-
-    const player = createAudioPlayer({
-      behaviors: {
-        noSubscriber: NoSubscriberBehavior.Pause,
-      },
-    });
-
-    player.on(AudioPlayerStatus.Playing, (obj) => {
-      console.log(`Playing: ${obj.resource.metadata.title}`);
-      // const channel = client.channels.cache.get()
-    });
-
-    player.on(AudioPlayerStatus.Idle, (audio) => {
-      audio.resource.retry = 0;
-      console.log('The audio player has started idling!');
-      
-      getNextResource(guildId).then((resource) => {
-        player.play(resource);
-      });
-    });
-
-    player.on('error', error => {
-      console.error(`Error: ${error.resource.metadata.title}` );
-      if (error.resource.metadata.retry < 3) {
-        error.resource.metadata.retry++;
-        player.play(error.resource);
-      } else {
-        getNextResource(guildId).then((resource) => {
-          player.play(resource);
-        });
-      }
-    });
-
-    cacheData['player'][guildId] = player;
-    connection.subscribe(player);
+    startConnecting(guildId, memberVoiceChannel);
 
     return ConnectionStatus.SUCCESS_JOINED_FROM_OTHER_CHANNEL;
   }
@@ -136,21 +143,22 @@ const getNextResource = async (guildId) => {
     }
 
     const resource = await createResource(url, title);
+
     return resource;
   }
 }
 
 const createResource = async (url, title) => {
     const stream = ytdl(url, { filter: 'audioonly',
-                              quality: "highestaudio",});
+                              quality: "highestaudio",
+                              dlChunkSize: 0});
 
     return resource = createAudioResource(stream, {
       metadata: {
         title: title,
         url: url,
-        retry: 0,
       },
     });
 }
 
-module.exports = { getNextResource, createResource, ConnectionStatus, connect};
+module.exports = { getNextResource, createResource, ConnectionStatus, connect, isSameVoiceChannel};

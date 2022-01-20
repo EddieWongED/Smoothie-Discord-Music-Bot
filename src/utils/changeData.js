@@ -1,41 +1,27 @@
 const fs = require('fs').promises;
 
-const subData = ['respondChannelId', 'playingNowMessageId', 'queueNessageId', 'queue'];
+const subData = ['respondChannelId', 'playingNowMessageId', 'queueMessageId', 'queue'];
 
 const checkGuildDataExist = async (guildId) => {
 	try {
-		const stat = await fs.stat('./data/guildData.json');
+		const stat = await fs.stat(`./data/guildData/${guildId}.json`);
 	} catch (err) {
 		try {
-			const write = await fs.writeFile('./data/guildData.json', JSON.stringify({}, null, 2));
-			console.log('guildData.json is created.')
+			const subDataObject = {};
+			for (subDatum of subData) {
+				if (subDatum == 'queue') {
+					subDataObject['queue'] = [];
+				} else {
+					subDataObject[subDatum] = null;
+				}
+			}
+
+			const write = await fs.writeFile(`./data/guildData/${guildId}.json`, JSON.stringify(subDataObject, null, 2));
+			console.log(`/data/guildData/${guildId}.json is created.`);
 		} catch (err) {
-			console.log('There is an error when creating guildData.json');
+			console.log(`There is an error when creating /data/guildData/${guildId}.json`);
 			return false;
 		}
-	}
-
-	const dataBuffer = await fs.readFile('./data/guildData.json');
-	const data = JSON.parse(dataBuffer);
-
-	if (!(guildId in data)) {
-		const subDataObject = {};
-		for (subDatum of subData) {
-			if (subDatum == 'queue') {
-				subDataObject['queue'] = [];
-			} else {
-				subDataObject[subDatum] = null;
-			}
-		}
-		data[guildId] = subDataObject;
-	}
-
-	try {
-		const write = await fs.writeFile('./data/guildData.json', JSON.stringify(data, null, 2));
-	} catch (err) {
-		console.log(err);
-
-		return false;
 	}
 
 	return true;
@@ -48,18 +34,25 @@ const setData = async (guildId, key, value) => {
 		return false;
 	}
 
-	const dataBuffer = await fs.readFile('./data/guildData.json');
-	const data = JSON.parse(dataBuffer);
+	const dataBuffer = await fs.readFile(`./data/guildData/${guildId}.json`);
+	var data;
 
-	if (!(key in data[guildId])) {
-		console.log('hihihihihihi');
+	try {
+		data = JSON.parse(dataBuffer);
+	} catch (err) {
+		console.log(`Error occurs when parsing /data/guildData/${guildId}.json`);
+		return null;
+	}
+
+	if (!(key in data)) {
+		console.log(`There is no such key in /data/guildData/${guildId}.json!`);
 		return false;
 	}
 
-	data[guildId][key] = value;
+	data[key] = value;
 
 	try {
-		const write = await fs.writeFile('./data/guildData.json', JSON.stringify(data, null, 2));
+		const write = await fs.writeFile(`./data/guildData/${guildId}.json`, JSON.stringify(data, null, 2));
 	} catch (err) {
 		console.log(err);
 
@@ -76,14 +69,22 @@ const retrieveData = async (guildId, key) => {
 		return false;
 	}
 
-	const dataBuffer = await fs.readFile('./data/guildData.json');
-	const data = JSON.parse(dataBuffer);
+	const dataBuffer = await fs.readFile(`./data/guildData/${guildId}.json`);
+	var data;
 
-	if (!(key in data[guildId])) {
+	try {
+		data = JSON.parse(dataBuffer);
+	} catch (err) {
+		console.log(`Error occurs when parsing /data/guildData/${guildId}.json`);
 		return null;
 	}
 
-	return data[guildId][key];
+	if (!(key in data)) {
+		console.log(`There is no such key in /data/guildData/${guildId}.json!`);
+		return false;
+	}
+
+	return data[key];
 }
 
 module.exports = { setData, retrieveData }
