@@ -1,7 +1,10 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ConnectionStatus, connect } = require('../../objects/subscription.js');
 const { queuePlaylist } = require('../../utils/queueURL.js');
+const { retrieveData } = require('../../utils/changeData.js');
 const { loadingEmbed, errorEmbed, successEmbed } = require('../../objects/embed.js');
+const cacheData = require('../../../data/cacheData.js');
+const youtubedl = require('youtube-dl-exec');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -58,12 +61,15 @@ module.exports = {
 		const url = process.env.LOOPPLAYLISTURL;
 
 		const metadata = await queuePlaylist(interaction.guildId, url);
+		
+		if (metadata === null) {
+			return;
+		}
 
 		embed = successEmbed(`All ${metadata.noOfVideo} videos are queued.`, `${metadata.noOfRepeated} of them were already in the queue. Enjoy the music.`);
 		if (followUp) {
 			try {
 			followUpMessage.edit({ embeds: [embed.embed], files: embed.files })
-				.catch((err) => {console.error(err);});
 			} catch (err) {
 				console.error(err);
 				embed = errorEmbed('Unknown error occurred!', 'A problem that the developer do not know wtf just happened.');

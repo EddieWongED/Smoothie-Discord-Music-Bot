@@ -2,6 +2,8 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { neturalEmbed, errorEmbed, playingNowEmbed, queueEmbed } = require('../../objects/embed.js');
 const { retrieveData } = require('../../utils/changeData.js');
 const cacheData = require('../../../data/cacheData.js');
+const ytdl = require('ytdl-core');
+const youtubedl = require('youtube-dl-exec');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -18,10 +20,6 @@ module.exports = {
 
 		let embed = neturalEmbed('Hi Eddie', 'This is a test command.');
 		await interaction.reply({ embeds: [embed.embed], files: embed.files })
-			.catch((err) => {console.error(err);});
-
-		embed = await queueEmbed(interaction.guildId, 100);
-		await interaction.followUp({ embeds: [embed.embed], files: embed.files })
 			.catch((err) => {console.error(err);});
 	},
 };

@@ -5,6 +5,7 @@ const cacheData = require('../../../data/cacheData.js');
 const { retrieveData } = require('../../utils/changeData.js');
 const { AudioPlayerStatus } = require('@discordjs/voice');
 const { createResource } = require('../../objects/subscription.js');
+const wait = require('util').promisify(setTimeout);
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -44,6 +45,8 @@ module.exports = {
 				.catch((err) => {console.error(err);});
 			return;
 		}
+
+		await wait(1000);
 
 		const player = cacheData['player'][interaction.guildId];
 		const queue = await retrieveData(interaction.guildId, 'queue');

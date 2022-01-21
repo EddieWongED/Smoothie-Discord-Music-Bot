@@ -1,15 +1,13 @@
 # Smoothie - a discord music bot
 
-A discord bot that is made for personal use, mainly for hosting music.  
-Add environment variables by yourself to make it work properly.
+A discord music bot that uses discord.js v13 to program. For personal use only, only for non-commercial and non-profit uses.
 
 TODO:
 
-- queue add button page skip.
-- add buttons to playing now.
-- add playlist support to `/play` (need to detect whatever its a playlist).
+- add alias to commands.
+- and swap, pause, resume commands.
+- add message line command (alongside with slash command).
 
 Bug:
 
-- Sometimes the first music will push two playing now message.
-- Sometimes the music will get error while switching music or midway.
+- Sometimes the music will get error while switching music or midway (hard to fix).

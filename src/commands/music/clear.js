@@ -21,8 +21,9 @@ module.exports = {
 		}
 
 		const queue = await retrieveData(interaction.guildId, 'queue');
+		const queueLength = queue.length;
 
-		if (queue.length == 0) {
+		if (queueLength == 0) {
 			embed = errorEmbed('There is nothing in the queue...', 'Why would you want to clear the queue when there is nothing in the queue?');
 			await interaction.editReply({ embeds: [embed.embed], files: embed.files })
 				.catch((err) => {console.error(err);});
@@ -35,7 +36,7 @@ module.exports = {
 
 		const status = await setData(interaction.guildId, 'queue', newQueue);
 		if (status) {
-			embed = successEmbed('Success!', 'The queue has been cleared');
+			embed = successEmbed('Success!', `${queueLength - 1} music have been cleared. The music that is currently playing will not be cleared.`);
 			await interaction.editReply({ embeds: [embed.embed], files: embed.files })
 				.catch((err) => {console.error(err);});
 		} else {

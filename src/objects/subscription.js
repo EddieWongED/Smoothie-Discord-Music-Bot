@@ -1,9 +1,13 @@
 const { getVoiceConnection, joinVoiceChannel, createAudioPlayer, NoSubscriberBehavior, AudioPlayerStatus, createAudioResource } = require('@discordjs/voice');
+const { MessageActionRow, MessageButton } = require('discord.js');
 const ytdl = require('ytdl-core');
 const cacheData = require('../../data/cacheData.js');
 const { retrieveData, setData } = require('../utils/changeData.js');
 const client = require('../index.js');
-const { playingNowEmbed } = require('../objects/embed.js')
+const { playingNowEmbed, errorEmbed } = require('../objects/embed.js')
+const wait = require('util').promisify(setTimeout);
+const { userMention } = require('@discordjs/builders');
+
 const ConnectionStatus = {
   SUCCESS: 0,
   SUCCESS_ALREADY_JOINED: 1,
@@ -36,6 +40,7 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
   const player = createAudioPlayer({
     behaviors: {
       noSubscriber: NoSubscriberBehavior.Pause,
+      maxMissedFrames: 50,
     },
   });
 
@@ -55,8 +60,28 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
             }  
           }
 
-          const embed = await playingNowEmbed(guildId);
-          const message = await channel.send({ embeds: [embed.embed], files: embed.files });
+          const playNextButton = new MessageButton()
+            .setCustomId('playNextButton')
+            .setLabel('Next Song')
+            .setStyle('SUCCESS')
+            .setDisabled(false);
+
+          const row = new MessageActionRow()
+		        .addComponents(playNextButton);
+
+          const info = await ytdl.getBasicInfo(obj.resource.metadata.url);
+
+          if (!info) {
+            console.log('cannot fetch info from the url.');
+
+            return;
+          }
+
+          const time = parseInt(info.videoDetails.lengthSeconds) * 1000;
+
+          let embed = await playingNowEmbed(guildId);
+          const message = await channel.send({ embeds: [embed.embed], files: embed.files, components: [row] });
+
           if (message) {
             const status = await setData(guildId, 'playingNowMessageId', message.id);
             if (!status) {
@@ -65,6 +90,40 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
           } else {
             console.log('Cannot send the message properly.');
           }
+
+          const filter = (interaction) => {
+            return interaction.message.id === message.id;
+          }
+
+          const collector = message.channel.createMessageComponentCollector({ 
+            filter, 
+            time: time, 
+          });
+
+          collector.on('collect', async (interaction) => {
+            await interaction.deferUpdate();
+            if (isSameVoiceChannel(interaction.guildId, interaction.member.voice.channel)) {
+              const resource = await getNextResource(guildId);
+
+              if (resource) {
+                player.play(resource);
+                collector.stop();
+              } else {
+                console.log('Unable to find the resource.');
+              }
+            } else {
+              embed = errorEmbed("Hey!", `${userMention(interaction.member.id)}, you are not in the same channel as Smoothie! Join the voice channel before clicking the 'Next Song' button!`);
+              const errorMessage = await interaction.channel.send({ embeds: [embed.embed], files: embed.files })
+                .catch((err) => {console.error(err)});
+
+              await wait(4000);
+              
+              await errorMessage.delete()
+                .catch((err) => {console.error(err)});
+            }
+          });
+
+  
       } else {
         console.log('Cannot find a proper channel to send the playing now message!');
       }
@@ -84,6 +143,7 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
   });
 
   player.on('error', async (error) => {
+    console.log(error);
     console.error(`Error: ${error.resource.metadata.title} ${error}` );
     const resource = await getNextResource(guildId);
 
@@ -150,9 +210,9 @@ const getNextResource = async (guildId) => {
 
 const createResource = async (url, title) => {
     const stream = ytdl(url, { filter: 'audioonly',
-                              quality: "highestaudio",
+                              quality: "lowestaudio",
                               dlChunkSize: 0});
-
+         
     return resource = createAudioResource(stream, {
       metadata: {
         title: title,

@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { loadingEmbed, neturalEmbed, errorEmbed, queueEmbed } = require('../../objects/embed.js');
 const { retrieveData, setData } = require('../../utils/changeData.js');
 const { isSameVoiceChannel } = require('../../objects/subscription.js');
-const { channel } = require('diagnostics_channel');
+const wait = require('util').promisify(setTimeout);
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -48,6 +48,8 @@ module.exports = {
 
 		embed = await queueEmbed(interaction.guildId, 1);
 
+		const tempQueue = await retrieveData(interaction.guildId, 'queue');
+
 		const firstPageButton = new MessageButton()
 			.setCustomId('queueFirstPage')
 			.setLabel('First Page')
@@ -60,18 +62,26 @@ module.exports = {
 			.setStyle('PRIMARY')
 			.setDisabled(true);
 
-		const nextPageButton = 	new MessageButton()
+		const nextPageButton = new MessageButton()
 			.setCustomId('queueNextPage')
 			.setLabel('Next Page')
-			.setStyle('PRIMARY');
+			.setStyle('PRIMARY')
+			.setDisabled(Math.ceil(tempQueue.length / 10) === 1);
 
-		const lastPageButton = 	new MessageButton()
+		const lastPageButton = new MessageButton()
 			.setCustomId('queueLastPage')
 			.setLabel('Last Page')
-			.setStyle('DANGER');
+			.setStyle('DANGER')
+			.setDisabled(Math.ceil(tempQueue.length / 10) === 1);
+
+		const choosePageButton = new MessageButton()
+			.setCustomId('queueChoosePage')
+			.setLabel('#')
+			.setStyle('SUCCESS')
+			.setDisabled(Math.ceil(tempQueue.length / 10) === 1);
 
 		const row = new MessageActionRow()
-		.addComponents(firstPageButton, prevPageButton, nextPageButton, lastPageButton);
+		.addComponents(firstPageButton, prevPageButton, nextPageButton, lastPageButton, choosePageButton);
 
 		const message = await interaction.editReply({ embeds: [embed.embed], files: embed.files, components: [row] })
 			.catch((err) => {console.error(err);});
@@ -88,8 +98,10 @@ module.exports = {
 
 		const collector = message.channel.createMessageComponentCollector({ 
 			filter, 
-			time: 100000
+			time: 120000
 		})
+
+		let clickedChoosePageButton = false;
 
 		collector.on('collect', async (interaction) => {
 			const queue = await retrieveData(interaction.guildId, 'queue');
@@ -124,6 +136,93 @@ module.exports = {
 				case 'queueLastPage':
 					page = maxPage;
 					break;
+				case 'queueChoosePage':
+					if (!clickedChoosePageButton) {
+						clickedChoosePageButton = true;
+						embed = neturalEmbed('Please type which page you want to jump to.', `Range: 1 - ${maxPage}. You have a minute to respond.`);
+						const pageNumberMessage = await interaction.channel.send({ embeds: [embed.embed], files: embed.files })
+							.catch((error) => {console.error(error)});
+					
+						const pageFilter = (filterInteraction) => {
+							console.log('hi');
+							return (interaction.member.id === filterInteraction.member.id)
+						}
+						
+						const pageCollector = pageNumberMessage.channel.createMessageCollector({ pageFilter, max: 1, time: 60000 });
+						
+						pageCollector.on('collect', async (memberMessage) => {
+							var content = memberMessage.content;
+							if (!isNaN(content) && !isNaN(parseInt(content))) {
+								content = parseInt(content);
+								if (content <= maxPage && content >= 1) {
+									page = content;
+									embed = await queueEmbed(interaction.guildId, page);
+
+									if (page == 1) {
+										firstPageButton.setDisabled(true);
+										prevPageButton.setDisabled(true);
+										nextPageButton.setDisabled(false);
+										lastPageButton.setDisabled(false);
+									} else if (page == maxPage) {
+										firstPageButton.setDisabled(false);
+										prevPageButton.setDisabled(false);
+										nextPageButton.setDisabled(true);
+										lastPageButton.setDisabled(true);
+									} else {
+										firstPageButton.setDisabled(false);
+										prevPageButton.setDisabled(false);
+										nextPageButton.setDisabled(false);
+										lastPageButton.setDisabled(false);
+									}
+
+									if (maxPage == 1) {
+										choosePageButton.setDisabled(true);
+									} else {
+										choosePageButton.setDisabled(false);
+									}
+
+									await message.edit({ embeds: [embed.embed], components: [row] })
+										.catch((err) => {console.log(err)});
+
+									await pageNumberMessage.delete()
+										.catch((err) => {console.log(err)});
+
+									await memberMessage.delete()
+										.catch((err) => {console.log(err)});
+								} else {
+									await memberMessage.delete()
+										.catch((err) => {console.log(err)});
+
+									embed = errorEmbed('The integer you typed is not within the range!', 'Please click the button and try again!');
+									await pageNumberMessage.edit({ embeds: [embed.embed], files: embed.files, ephemeral: true })
+										.catch(error => {console.error(error)});
+
+									await wait(4000);
+
+									await pageNumberMessage.delete()
+										.catch((err) => {console.log(err)});
+								}
+							} else {
+								await memberMessage.delete()
+										.catch((err) => {console.log(err)});
+
+								embed = errorEmbed('The message you typed is not a integer!', 'Please click the button and try again!');
+								await pageNumberMessage.edit({ embeds: [embed.embed], files: embed.files, ephemeral: true })
+									.catch(error => {console.error(error)});
+								
+								await wait(4000);
+
+								await pageNumberMessage.delete()
+										.catch((err) => {console.log(err)});
+							}
+						});
+
+						pageCollector.on('end', async (collected) => {
+							clickedChoosePageButton = false;
+						});
+					}
+
+					break;
 			}
 
 			if (page == 1) {
@@ -142,7 +241,12 @@ module.exports = {
 				nextPageButton.setDisabled(false);
 				lastPageButton.setDisabled(false);
 			}
-
+			
+			if (maxPage == 1) {
+				choosePageButton.setDisabled(true);
+			} else {
+				choosePageButton.setDisabled(false);
+			}
 			embed = await queueEmbed(interaction.guildId, page);
 			await interaction.update({ embeds: [embed.embed], components: [row] })
 				.catch((err) => {console.log(err)});

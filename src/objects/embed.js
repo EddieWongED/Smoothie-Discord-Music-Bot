@@ -1,6 +1,7 @@
 const ytdl = require('ytdl-core');
 const { MessageAttachment, MessageEmbed } = require('discord.js');
 const { retrieveData } = require('../utils/changeData.js');
+const { bold, italic, strikethrough, underscore, spoiler, quote, blockQuote, inlineCode } = require('@discordjs/builders');
 
 const successEmbed = (title, des) => {
 	const xxxhdpiIcon = new MessageAttachment('./icon/mipmap-xxxhdpi/smoothie.png');
@@ -162,11 +163,10 @@ const queueEmbed = async (guildId, page) => {
 		}
 	}
 
-	let des = '```CSS\n';
+	let des = '';
 	for (let i = 0; i < titleArr.length; i++) {
-		des = `${des}${(page - 1) * 10 + i + 1}: ${titleArr[i]} \n`;
+		des = `${des}${(page - 1) * 10 + i + 1}: ${inlineCode(titleArr[i])} \n`;
 	}
-	des = des + '```';
 
 	const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
 
@@ -175,7 +175,7 @@ const queueEmbed = async (guildId, page) => {
 	.setTitle(`Queue`)
 	.setDescription(des)
 	.setTimestamp()
-	.setFooter({ text: `Smoothie - Page: ${page}/${maxPage}`, iconURL: 'attachment://smoothie.png'});
+	.setFooter({ text: `Smoothie - Page: ${page}/${maxPage} - Buttons will be disabled in 2 minutes`, iconURL: 'attachment://smoothie.png'});
 	return {
 		embed: embed,
 		files: [hdpiIcon]
