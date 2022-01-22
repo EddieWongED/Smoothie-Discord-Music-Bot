@@ -19,15 +19,11 @@ getFiles('./src/commands')
 
 		const rest = new REST({ version: '9' }).setToken(process.env.TOKEN);
 
-		rest.put(Routes.applicationGuildCommands(process.env.CLIENTID, process.env.TESTGUILDID1), { body: commands })
-			.then(() => console.log('Successfully registered application commands for test server1.'))
+		rest.put(Routes.applicationGuildCommands(process.env.CLIENTID, process.env.TESTGUILDID), { body: commands })
+			.then(() => console.log('Successfully registered application commands for test server.'))
 			.catch(console.error);
 
-		rest.put(Routes.applicationGuildCommands(process.env.CLIENTID, process.env.TESTGUILDID2), { body: commands })
-			.then(() => console.log('Successfully registered application commands for test server2.'))
-			.catch(console.error);
-
-		rest.put(Routes.applicationGuildCommands(process.env.CLIENTID), { body: commands })
+		rest.put(Routes.applicationCommands(process.env.CLIENTID), { body: commands })
 			.then(() => console.log('Successfully registered application commands for all servers. The update might takes up to an hour to register across all the server.'))
 			.catch(console.error);
 	})
