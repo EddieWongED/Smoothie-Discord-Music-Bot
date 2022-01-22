@@ -1,14 +1,14 @@
 # Smoothie - a discord music bot :musical_note:
 
-A discord music bot that uses discord.js v13 to program. For personal use only, only for non-commercial and non-profit uses.
+A discord music bot that uses discord.js v13 to program. For personal use only.
 
 Give a :heartbeat: and :star: if this bot helps!
 
 ## Feature Highlight :rotating_light:
 
-[Playing Now Photo](screenshot/playing_now.png)
+![Playing Now Photo](screenshot/playing_now.png)
 
-[Queue Photo](screenshot/queue.png)
+![Queue Photo](screenshot/queue.png)
 
 ## Commands :keyboard:
 
@@ -16,9 +16,9 @@ Give a :heartbeat: and :star: if this bot helps!
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | clear            | Clears the queue except the music that is currently playing.                                                                                                                                                                    |
 | join             | Joins your voice channel. If there is something in the queue, the music will be automatically played.                                                                                                                           |
-| leave            | Leaves your voice channel                                                                                                                                                                                                       |
-| play             | Queues the music with the provided Youtube URL. Can either be a video or a playlist URL. If `play_now` is `True` and the URL is an video, the video will play immediately. `play_now` has no effect on playlist.                |
-| playloopplaylist | Queues the playlist which the URL is specified on environment variable `LOOPPLAYLISTURL`. The purpose of this command is to avoid copying and pasting the playlist URL which you and your friends save your favourite music on. |
+| leave            | Leaves your voice channel.                                                                                                                                                                                                      |
+| play             | Queues the music with the provided Youtube URL. Can either be a single music or a playlist URL. If `play_now` is `True` and the URL is an music, the music will play immediately. `play_now` has no effect on playlist.         |
+| playloopplaylist | Queues the playlist where the URL is specified on environment variable `LOOPPLAYLISTURL`. The purpose of this command is to avoid copying and pasting the playlist URL where you and your friends save your favourite music on. |
 | queue            | Shows the queue.                                                                                                                                                                                                                |
 | shuffle          | Shuffles the queue.                                                                                                                                                                                                             |
 | skip             | Skips the current music.                                                                                                                                                                                                        |
