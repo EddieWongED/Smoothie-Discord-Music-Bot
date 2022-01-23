@@ -270,10 +270,9 @@ const getNextResource = async (guildId) => {
 
 const createResource = async (url, title) => {
 	const stream = ytdl(url, {
-		o: '-',
-		q: '',
-		f: 'bestaudio[ext=webm+acodec=opus+asr=48000]/bestaudio',
-		r: '100K',
+		filter: 'audioonly',
+		quality: 'lowestaudio',
+		dlChunkSize: 0,
 	});
 
 	return (resource = createAudioResource(stream, {
