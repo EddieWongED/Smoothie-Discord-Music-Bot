@@ -18,29 +18,28 @@ client.commands = new Collection();
 
 getFiles('./src/commands')
 	.then((files) => {
-		const commandDirs = files.filter(file => file.endsWith('.js'));
+		const commandDirs = files.filter((file) => file.endsWith('.js'));
 		for (const commandDir of commandDirs) {
 			const command = require(commandDir);
 			client.commands.set(command.data.name, command);
 		}
 	})
-	.catch(e => console.error(e));
+	.catch((e) => console.error(e));
 
 // Setting up events
 getFiles('./src/events')
 	.then((files) => {
-		const eventDirs = files.filter(file => file.endsWith('.js'));
+		const eventDirs = files.filter((file) => file.endsWith('.js'));
 		for (const eventDir of eventDirs) {
 			const event = require(eventDir);
 			if (event.once) {
 				client.once(event.name, (...args) => event.execute(...args));
-			}
-			else {
+			} else {
 				client.on(event.name, (...args) => event.execute(...args));
 			}
 		}
 	})
-	.catch(e => console.error(e));
+	.catch((e) => console.error(e));
 
 client.login(process.env.TOKEN);
 

@@ -1,77 +1,85 @@
 const ytdl = require('ytdl-core');
 const { MessageAttachment, MessageEmbed } = require('discord.js');
 const { retrieveData } = require('../utils/changeData.js');
-const { bold, italic, strikethrough, underscore, spoiler, quote, blockQuote, inlineCode } = require('@discordjs/builders');
+const { inlineCode } = require('@discordjs/builders');
 
 const successEmbed = (title, des) => {
-	const xxxhdpiIcon = new MessageAttachment('./icon/mipmap-xxxhdpi/smoothie.png');
+	const xxxhdpiIcon = new MessageAttachment(
+		'./icon/mipmap-xxxhdpi/smoothie.png'
+	);
 	const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
 	const embed = new MessageEmbed()
-	.setColor('#63E68C')
-	.setTitle(`:white_check_mark: ${title}`)
-	.setDescription(des)
-	.setThumbnail('attachment://smoothie.png')
-	.setTimestamp()
-	.setFooter({ text: 'Smoothie', iconURL: 'attachment://smoothie.png'});
+		.setColor('#63E68C')
+		.setTitle(`:white_check_mark: ${title}`)
+		.setDescription(des)
+		.setThumbnail('attachment://smoothie.png')
+		.setTimestamp()
+		.setFooter({ text: 'Smoothie', iconURL: 'attachment://smoothie.png' });
 	return {
 		embed: embed,
-		files: [xxxhdpiIcon, hdpiIcon]
-	}
-}
+		files: [xxxhdpiIcon, hdpiIcon],
+	};
+};
 
 const loadingEmbed = (title, des) => {
-	const xxxhdpiIcon = new MessageAttachment('./icon/mipmap-xxxhdpi/smoothie.png');
+	const xxxhdpiIcon = new MessageAttachment(
+		'./icon/mipmap-xxxhdpi/smoothie.png'
+	);
 	const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
 	const embed = new MessageEmbed()
-	.setColor('#FAA81A')
-	.setTitle(`:hourglass: ${title}`)
-	.setDescription(des)
-	.setThumbnail('attachment://smoothie.png')
-	.setTimestamp()
-	.setFooter({ text: 'Smoothie', iconURL: 'attachment://smoothie.png'});
+		.setColor('#FAA81A')
+		.setTitle(`:hourglass: ${title}`)
+		.setDescription(des)
+		.setThumbnail('attachment://smoothie.png')
+		.setTimestamp()
+		.setFooter({ text: 'Smoothie', iconURL: 'attachment://smoothie.png' });
 	return {
 		embed: embed,
-		files: [xxxhdpiIcon, hdpiIcon]
-	}
-}
+		files: [xxxhdpiIcon, hdpiIcon],
+	};
+};
 
 const errorEmbed = (title, des) => {
-	const xxxhdpiIcon = new MessageAttachment('./icon/mipmap-xxxhdpi/smoothie.png');
+	const xxxhdpiIcon = new MessageAttachment(
+		'./icon/mipmap-xxxhdpi/smoothie.png'
+	);
 	const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
 	const embed = new MessageEmbed()
-	.setColor('#DA5849')
-	.setTitle(`:no_entry: ${title}`)
-	.setDescription(des)
-	.setThumbnail('attachment://smoothie.png')
-	.setTimestamp()
-	.setFooter({ text: 'Smoothie', iconURL: 'attachment://smoothie.png'});
+		.setColor('#DA5849')
+		.setTitle(`:no_entry: ${title}`)
+		.setDescription(des)
+		.setThumbnail('attachment://smoothie.png')
+		.setTimestamp()
+		.setFooter({ text: 'Smoothie', iconURL: 'attachment://smoothie.png' });
 	return {
 		embed: embed,
-		files: [xxxhdpiIcon, hdpiIcon]
-	}
-}
+		files: [xxxhdpiIcon, hdpiIcon],
+	};
+};
 
 const neturalEmbed = (title, des) => {
-	const xxxhdpiIcon = new MessageAttachment('./icon/mipmap-xxxhdpi/smoothie.png');
+	const xxxhdpiIcon = new MessageAttachment(
+		'./icon/mipmap-xxxhdpi/smoothie.png'
+	);
 	const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
 	const embed = new MessageEmbed()
-	.setColor('#7C5295')
-	.setTitle(title)
-	.setDescription(des)
-	.setThumbnail('attachment://smoothie.png')
-	.setTimestamp()
-	.setFooter({ text: 'Smoothie', iconURL: 'attachment://smoothie.png'});
+		.setColor('#7C5295')
+		.setTitle(title)
+		.setDescription(des)
+		.setThumbnail('attachment://smoothie.png')
+		.setTimestamp()
+		.setFooter({ text: 'Smoothie', iconURL: 'attachment://smoothie.png' });
 	return {
 		embed: embed,
-		files: [xxxhdpiIcon, hdpiIcon]
-	}
-}
+		files: [xxxhdpiIcon, hdpiIcon],
+	};
+};
 
 const playingNowEmbed = async (guildId) => {
 	const queue = await retrieveData(guildId, 'queue');
 	if (queue.length >= 1) {
 		const url = queue[0]['url'];
-		
+
 		var nextTitle = queue[0]['title'];
 		if (queue.length > 1) {
 			nextTitle = queue[1]['title'];
@@ -93,56 +101,65 @@ const playingNowEmbed = async (guildId) => {
 			defaultThumbnail = false;
 		}
 
-		const hour = Math.floor(Math.floor(parseInt(info.videoDetails.lengthSeconds) / 60) / 60);
-		var min = Math.floor(parseInt(info.videoDetails.lengthSeconds) / 60) % 60;
+		const hour = Math.floor(
+			Math.floor(parseInt(info.videoDetails.lengthSeconds) / 60) / 60
+		);
+		var min =
+			Math.floor(parseInt(info.videoDetails.lengthSeconds) / 60) % 60;
 		var sec = parseInt(info.videoDetails.lengthSeconds) % 60;
-		sec = ("0" + sec).slice(-2);
+		sec = ('0' + sec).slice(-2);
 
 		var durationString = `${hour}:${min}:${sec}`;
-		if (hour == 0) {	
-			durationString = `${min}:${sec}`
+		if (hour == 0) {
+			durationString = `${min}:${sec}`;
 		} else {
-			min = ("0" + min).slice(-2);
+			min = ('0' + min).slice(-2);
 			durationString = `${hour}:${min}:${sec}`;
 		}
 
-		const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
+		const hdpiIcon = new MessageAttachment(
+			'./icon/mipmap-hdpi/smoothie.png'
+		);
 
 		const embed = new MessageEmbed()
-		.setColor('#12E9E9')
-		.setTitle('Playing Now')
-		.setThumbnail(thumbnailURL)
-		.setDescription(`[${info.videoDetails.title}](${url})`)
-		.addFields(
-			{ name: 'Duration', value: durationString, inline: true },
-			{ name: '\u200B', value: '\u200B', inline: true },
-			{ name: 'Up Coming', value: nextTitle, inline: true }
-		)
-		.setTimestamp()
-		.setFooter({ text: 'Smoothie', iconURL: 'attachment://smoothie.png'});
+			.setColor('#12E9E9')
+			.setTitle('Playing Now')
+			.setThumbnail(thumbnailURL)
+			.setDescription(`[${info.videoDetails.title}](${url})`)
+			.addFields(
+				{ name: 'Duration', value: durationString, inline: true },
+				{ name: '\u200B', value: '\u200B', inline: true },
+				{ name: 'Up Coming', value: nextTitle, inline: true }
+			)
+			.setTimestamp()
+			.setFooter({
+				text: 'Smoothie',
+				iconURL: 'attachment://smoothie.png',
+			});
 
 		if (defaultThumbnail) {
-			const xxxhdpiIcon = new MessageAttachment('./icon/mipmap-xxxhdpi/smoothie.png');
+			const xxxhdpiIcon = new MessageAttachment(
+				'./icon/mipmap-xxxhdpi/smoothie.png'
+			);
 
 			return {
 				embed: embed,
-				files: [xxxhdpiIcon, hdpiIcon]
-			}
+				files: [xxxhdpiIcon, hdpiIcon],
+			};
 		} else {
 			return {
 				embed: embed,
-				files: [hdpiIcon]
-			}
+				files: [hdpiIcon],
+			};
 		}
-
 	}
-}
+};
 
 const queueEmbed = async (guildId, page) => {
 	const queue = await retrieveData(guildId, 'queue');
 
 	const maxPage = Math.ceil(queue.length / 10);
-	
+
 	if (page > maxPage) {
 		page = maxPage;
 	}
@@ -171,15 +188,25 @@ const queueEmbed = async (guildId, page) => {
 	const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
 
 	const embed = new MessageEmbed()
-	.setColor('#5865F2')
-	.setTitle(`Queue`)
-	.setDescription(des)
-	.setTimestamp()
-	.setFooter({ text: `Smoothie - Page: ${page}/${maxPage} - Buttons will be disabled in 2 minutes`, iconURL: 'attachment://smoothie.png'});
+		.setColor('#5865F2')
+		.setTitle(`Queue`)
+		.setDescription(des)
+		.setTimestamp()
+		.setFooter({
+			text: `Smoothie - Page: ${page}/${maxPage} - Buttons will be disabled in 2 minutes`,
+			iconURL: 'attachment://smoothie.png',
+		});
 	return {
 		embed: embed,
-		files: [hdpiIcon]
-	}
-}
+		files: [hdpiIcon],
+	};
+};
 
-module.exports = { successEmbed, loadingEmbed, errorEmbed, neturalEmbed, playingNowEmbed, queueEmbed }
+module.exports = {
+	successEmbed,
+	loadingEmbed,
+	errorEmbed,
+	neturalEmbed,
+	playingNowEmbed,
+	queueEmbed,
+};
