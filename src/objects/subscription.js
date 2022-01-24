@@ -148,7 +148,9 @@ const createPlayer = (guildId, connection) => {
 					const message =
 						channel.messages.cache.get(playingNowMessageId);
 					if (message) {
-						const content = await message.delete();
+						const content = await message.delete().catch((err) => {
+							console.log('Cannot Find the message.');
+						});
 					} else {
 						console.log('Cannot find the message to be deleted.');
 					}
