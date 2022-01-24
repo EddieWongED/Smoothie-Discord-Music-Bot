@@ -1,311 +1,306 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { getVoiceConnection, AudioPlayerStatus } = require('@discordjs/voice');
 const ytdl = require('ytdl-core');
-const youtubedl = require('youtube-dl-exec');
 const {
-    connect,
-    ConnectionStatus,
-    createResource,
+	connect,
+	ConnectionStatus,
+	createResource,
+	createPlayer,
 } = require('../../objects/subscription.js');
 const { retrieveData, setData } = require('../../utils/changeData.js');
 const { queueMusic, QueueVideoStatus } = require('../../utils/queueURL.js');
 const {
-    loadingEmbed,
-    errorEmbed,
-    successEmbed,
+	loadingEmbed,
+	errorEmbed,
+	successEmbed,
 } = require('../../objects/embed.js');
 const cacheData = require('../../../data/cacheData.js');
 const { queuePlaylist } = require('../../utils/queueURL.js');
+const wait = require('util').promisify(setTimeout);
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('play')
-        .setDescription('Plays music with specified Youtube URL.')
-        .addStringOption((option) =>
-            option
-                .setName('url')
-                .setDescription('The URL of a Youtube video.')
-                .setRequired(true)
-        )
-        .addBooleanOption((option) =>
-            option
-                .setName('play_now')
-                .setDescription(
-                    'Plays the music immediately if the URL is a video. A playlist does no effect.'
-                )
-                .setRequired(true)
-        ),
-    async execute(interaction) {
-        let embed = loadingEmbed(
-            'Attempting to play music...',
-            'Please be patient...'
-        );
-        await interaction
-            .reply({ embeds: [embed.embed], files: embed.files })
-            .catch((err) => {
-                console.error(err);
-            });
+	data: new SlashCommandBuilder()
+		.setName('play')
+		.setDescription('Plays music with specified Youtube URL.')
+		.addStringOption((option) =>
+			option
+				.setName('url')
+				.setDescription('The URL of a Youtube video.')
+				.setRequired(true)
+		)
+		.addBooleanOption((option) =>
+			option
+				.setName('play_now')
+				.setDescription(
+					'Plays the music immediately if the URL is a video. A playlist does no effect.'
+				)
+				.setRequired(true)
+		),
+	async execute(interaction) {
+		let embed = loadingEmbed(
+			'Attempting to play music...',
+			'Please be patient...'
+		);
+		await interaction
+			.reply({ embeds: [embed.embed], files: embed.files })
+			.catch((err) => {
+				console.error(err);
+			});
 
-        let followUp = false;
-        let followUpMessage = null;
+		let followUp = false;
+		let followUpMessage = null;
 
-        const connectionStatus = await connect(
-            interaction.guildId,
-            interaction.member.voice.channel
-        );
+		const connectionStatus = await connect(
+			interaction.guildId,
+			interaction.member.voice.channel
+		);
 
-        switch (connectionStatus) {
-            case ConnectionStatus.SUCCESS:
-                embed = successEmbed(
-                    'Smoothie joined the voice channel.',
-                    'Please welcome her! She is a shy girl.'
-                );
-                await interaction
-                    .editReply({ embeds: [embed.embed], files: embed.files })
-                    .catch((err) => {
-                        console.error(err);
-                    });
-                followUp = true;
-                break;
-            case ConnectionStatus.SUCCESS_ALREADY_JOINED:
-                break;
-            case ConnectionStatus.SUCCESS_JOINED_FROM_OTHER_CHANNEL:
-                embed = successEmbed(
-                    'Smoothie joined from another voice channel.',
-                    'Please welcome her! She is a shy girl.'
-                );
-                await interaction
-                    .editReply({ embeds: [embed.embed], files: embed.files })
-                    .catch((err) => {
-                        console.error(err);
-                    });
-                followUp = true;
-                break;
-            case ConnectionStatus.ERROR_NOT_IN_CHANNEL:
-                embed = errorEmbed(
-                    'You are not in a voice channel!',
-                    'dumbass.'
-                );
-                await interaction
-                    .editReply({ embeds: [embed.embed], files: embed.files })
-                    .catch((err) => {
-                        console.error(err);
-                    });
-                return;
-            default:
-                embed = errorEmbed(
-                    'Unknown error occurred!',
-                    'A problem that the developer do not know wtf just happened.'
-                );
-                await interaction
-                    .editReply({ embeds: [embed.embed], files: embed.files })
-                    .catch((err) => {
-                        console.error(err);
-                    });
-                return;
-        }
+		switch (connectionStatus) {
+			case ConnectionStatus.SUCCESS:
+				embed = successEmbed(
+					'Smoothie joined the voice channel.',
+					'Please welcome her! She is a shy girl.'
+				);
+				await interaction
+					.editReply({ embeds: [embed.embed], files: embed.files })
+					.catch((err) => {
+						console.error(err);
+					});
+				followUp = true;
+				break;
+			case ConnectionStatus.SUCCESS_ALREADY_JOINED:
+				break;
+			case ConnectionStatus.SUCCESS_JOINED_FROM_OTHER_CHANNEL:
+				embed = successEmbed(
+					'Smoothie joined from another voice channel.',
+					'Please welcome her! She is a shy girl.'
+				);
+				await interaction
+					.editReply({ embeds: [embed.embed], files: embed.files })
+					.catch((err) => {
+						console.error(err);
+					});
+				followUp = true;
+				break;
+			case ConnectionStatus.ERROR_NOT_IN_CHANNEL:
+				embed = errorEmbed(
+					'You are not in a voice channel!',
+					'dumbass.'
+				);
+				await interaction
+					.editReply({ embeds: [embed.embed], files: embed.files })
+					.catch((err) => {
+						console.error(err);
+					});
+				return;
+			default:
+				embed = errorEmbed(
+					'Unknown error occurred!',
+					'A problem that the developer do not know wtf just happened.'
+				);
+				await interaction
+					.editReply({ embeds: [embed.embed], files: embed.files })
+					.catch((err) => {
+						console.error(err);
+					});
+				return;
+		}
 
-        embed = loadingEmbed('Loading the music...', 'Please be patient.');
+		await wait(1000);
 
-        if (followUp) {
-            followUpMessage = await interaction
-                .followUp({ embeds: [embed.embed], files: embed.files })
-                .catch((err) => {
-                    console.error(err);
-                });
-        } else {
-            await interaction
-                .editReply({ embeds: [embed.embed], files: embed.files })
-                .catch((err) => {
-                    console.error(err);
-                });
-        }
+		embed = loadingEmbed('Loading the music...', 'Please be patient.');
 
-        const url = interaction.options.getString('url');
+		if (followUp) {
+			followUpMessage = await interaction
+				.followUp({ embeds: [embed.embed], files: embed.files })
+				.catch((err) => {
+					console.error(err);
+				});
+		} else {
+			await interaction
+				.editReply({ embeds: [embed.embed], files: embed.files })
+				.catch((err) => {
+					console.error(err);
+				});
+		}
 
-        if (!ytdl.validateURL(url)) {
-            const metadata = await queuePlaylist(interaction.guildId, url);
-            if (metadata != null) {
-                embed = successEmbed(
-                    `All ${metadata.noOfVideo} videos are queued.`,
-                    `${metadata.noOfRepeated} of them were already in the queue. Enjoy the music.`
-                );
-            } else {
-                embed = errorEmbed(
-                    'Invalid URL!',
-                    'Please check if the provided URL is valid or not.'
-                );
-            }
-            if (followUp) {
-                followUpMessage
-                    .edit({ embeds: [embed.embed], files: embed.files })
-                    .catch((err) => {
-                        console.error(err);
-                    });
-            } else {
-                await interaction
-                    .editReply({ embeds: [embed.embed], files: embed.files })
-                    .catch((err) => {
-                        console.error(err);
-                    });
-            }
-        } else {
-            const playNow = interaction.options.getBoolean('play_now');
+		const url = interaction.options.getString('url');
 
-            const status = await queueMusic(interaction.guildId, url);
+		if (!ytdl.validateURL(url)) {
+			const metadata = await queuePlaylist(interaction.guildId, url);
+			if (metadata != null) {
+				embed = successEmbed(
+					`All ${metadata.noOfVideo} videos are queued.`,
+					`${metadata.noOfRepeated} of them were already in the queue. Enjoy the music.`
+				);
+			} else {
+				embed = errorEmbed(
+					'Invalid URL!',
+					'Please check if the provided URL is valid or not.'
+				);
+			}
+			if (followUp) {
+				followUpMessage
+					.edit({ embeds: [embed.embed], files: embed.files })
+					.catch((err) => {
+						console.error(err);
+					});
+			} else {
+				await interaction
+					.editReply({ embeds: [embed.embed], files: embed.files })
+					.catch((err) => {
+						console.error(err);
+					});
+			}
+		} else {
+			const playNow = interaction.options.getBoolean('play_now');
 
-            switch (status) {
-                case QueueVideoStatus.SUCCESS:
-                    if (playNow) {
-                        const queue = await retrieveData(
-                            interaction.guildId,
-                            'queue'
-                        );
-                        if (queue.length >= 1) {
-                            [queue[0], queue[queue.length - 1]] = [
-                                queue[queue.length - 1],
-                                queue[0],
-                            ];
-                            const saveStatus = await setData(
-                                interaction.guildId,
-                                'queue',
-                                queue
-                            );
-                            if (saveStatus) {
-                                const player =
-                                    cacheData['player'][interaction.guildId];
-                                const resource = await createResource(
-                                    queue[0]['url'],
-                                    queue[0]['title']
-                                );
-                                if (resource != null) {
-                                    player.play(resource);
+			const status = await queueMusic(interaction.guildId, url);
 
-                                    embed = successEmbed(
-                                        'Playing the music now.',
-                                        'Enjoy the music.'
-                                    );
-                                } else {
-                                    embed = errorEmbed(
-                                        'Unknown error occurred!',
-                                        'A problem that the developer do not know wtf just happened.'
-                                    );
-                                }
-                            } else {
-                                embed = errorEmbed(
-                                    'Unknown error occurred!',
-                                    'A problem that the developer do not know wtf just happened.'
-                                );
-                            }
-                        } else {
-                            embed = errorEmbed(
-                                'Unknown error occurred!',
-                                'A problem that the developer do not know wtf just happened.'
-                            );
-                        }
-                    } else {
-                        embed = successEmbed(
-                            'Queued the music.',
-                            'The song was placed at the end of the queue.'
-                        );
-                    }
-                    break;
-                case QueueVideoStatus.ERROR_INVALID_URL:
-                    embed = errorEmbed(
-                        'Invalid URL!',
-                        'Please check if the provided URL is valid or not.'
-                    );
-                    break;
-                case QueueVideoStatus.ERROR_ALREADY_EXIST:
-                    if (playNow) {
-                        let queue = await retrieveData(
-                            interaction.guildId,
-                            'queue'
-                        );
-                        const videoInfo = await ytdl.getBasicInfo(url, []);
+			switch (status) {
+				case QueueVideoStatus.SUCCESS:
+					if (playNow) {
+						const queue = await retrieveData(
+							interaction.guildId,
+							'queue'
+						);
+						if (queue.length >= 1) {
+							[queue[0], queue[queue.length - 1]] = [
+								queue[queue.length - 1],
+								queue[0],
+							];
+							const saveStatus = await setData(
+								interaction.guildId,
+								'queue',
+								queue
+							);
+							if (saveStatus) {
+								embed = successEmbed(
+									'Playing the music now.',
+									'Enjoy the music.'
+								);
+							} else {
+								embed = errorEmbed(
+									'Unknown error occurred!',
+									'A problem that the developer do not know wtf just happened.'
+								);
+							}
+						} else {
+							embed = errorEmbed(
+								'Unknown error occurred!',
+								'A problem that the developer do not know wtf just happened.'
+							);
+						}
+					} else {
+						embed = successEmbed(
+							'Queued the music.',
+							'The song was placed at the end of the queue.'
+						);
+					}
+					break;
+				case QueueVideoStatus.ERROR_INVALID_URL:
+					embed = errorEmbed(
+						'Invalid URL!',
+						'Please check if the provided URL is valid or not.'
+					);
+					break;
+				case QueueVideoStatus.ERROR_ALREADY_EXIST:
+					if (playNow) {
+						let queue = await retrieveData(
+							interaction.guildId,
+							'queue'
+						);
+						const videoInfo = await ytdl.getBasicInfo(url, []);
 
-                        const index = queue.findIndex(
-                            (element) =>
-                                element['url'] ===
-                                videoInfo.videoDetails.video_url
-                        );
-                        const indexValue = queue[index];
-                        if (index == 0) {
-                            embed = errorEmbed(
-                                'The required music is currently playing!',
-                                'Did you not noticing that?'
-                            );
-                        } else if (index != -1) {
-                            const firstItem = queue.shift();
-                            queue.push(firstItem);
-                            queue = queue.filter(
-                                (element) => element !== indexValue
-                            );
-                            queue.unshift(indexValue);
+						const index = queue.findIndex(
+							(element) =>
+								element['url'] ===
+								videoInfo.videoDetails.video_url
+						);
+						const indexValue = queue[index];
+						if (index == 0) {
+							embed = errorEmbed(
+								'The required music is currently playing!',
+								'Did you not noticing that?'
+							);
+						} else if (index != -1) {
+							const firstItem = queue.shift();
+							queue.push(firstItem);
+							queue = queue.filter(
+								(element) => element !== indexValue
+							);
+							queue.unshift(indexValue);
 
-                            const saveStatus = await setData(
-                                interaction.guildId,
-                                'queue',
-                                queue
-                            );
-                            if (saveStatus) {
-                                if (queue.length >= 1) {
-                                    const player =
-                                        cacheData['player'][
-                                            interaction.guildId
-                                        ];
-                                    const resource = await createResource(
-                                        queue[0]['url'],
-                                        queue[0]['title']
-                                    );
-                                    if (resource != null) {
-                                        player.play(resource);
-                                        embed = successEmbed(
-                                            'Moved the required music to the front!',
-                                            `Since the music was already in the queue, Smoothie moved the required music from ${
-                                                index + 1
-                                            } to the front.`
-                                        );
-                                    } else {
-                                        embed = errorEmbed(
-                                            'Unknown error occurred!',
-                                            'A problem that the developer do not know wtf just happened.'
-                                        );
-                                    }
-                                }
-                            } else {
-                                embed = errorEmbed(
-                                    'Unknown error occurred!',
-                                    'A problem that the developer do not know wtf just happened.'
-                                );
-                            }
-                        } else {
-                            embed = errorEmbed(
-                                'Unknown error occurred!',
-                                'A problem that the developer do not know wtf just happened.'
-                            );
-                        }
-                    } else {
-                        embed = errorEmbed(
-                            'The music was already in the queue!',
-                            'Dumbass.'
-                        );
-                    }
-                    break;
-            }
+							const saveStatus = await setData(
+								interaction.guildId,
+								'queue',
+								queue
+							);
+							if (saveStatus) {
+								embed = successEmbed(
+									'Moved the required music to the front!',
+									`Since the music was already in the queue, Smoothie moved the required music from ${
+										index + 1
+									} to the front.`
+								);
+							} else {
+								embed = errorEmbed(
+									'Unknown error occurred!',
+									'A problem that the developer do not know wtf just happened.'
+								);
+							}
+						} else {
+							embed = errorEmbed(
+								'Unknown error occurred!',
+								'A problem that the developer do not know wtf just happened.'
+							);
+						}
+					} else {
+						embed = errorEmbed(
+							'The music was already in the queue!',
+							'Dumbass.'
+						);
+					}
+					break;
+			}
 
-            if (followUp) {
-                followUpMessage
-                    .edit({ embeds: [embed.embed], files: embed.files })
-                    .catch((err) => {
-                        console.error(err);
-                    });
-            } else {
-                await interaction
-                    .editReply({ embeds: [embed.embed], files: embed.files })
-                    .catch((err) => {
-                        console.error(err);
-                    });
-            }
-        }
-    },
+			const player = cacheData['player'][interaction.guildId];
+			const queue = await retrieveData(interaction.guildId, 'queue');
+
+			if (
+				queue.length >= 1 &&
+				(player.state.status == AudioPlayerStatus.Idle || playNow)
+			) {
+				const resource = await createResource(
+					queue[0]['url'],
+					queue[0]['title']
+				);
+				if (resource != null) {
+					const connection = getVoiceConnection(interaction.guildId);
+					if (connection) {
+						const newPlayer = createPlayer(
+							interaction.guildId,
+							connection
+						);
+						connection.subscribe(newPlayer);
+						newPlayer.play(resource);
+					}
+				}
+			}
+
+			if (followUp) {
+				followUpMessage
+					.edit({ embeds: [embed.embed], files: embed.files })
+					.catch((err) => {
+						console.error(err);
+					});
+			} else {
+				await interaction
+					.editReply({ embeds: [embed.embed], files: embed.files })
+					.catch((err) => {
+						console.error(err);
+					});
+			}
+		}
+	},
 };

@@ -5,6 +5,7 @@ const {
 	NoSubscriberBehavior,
 	AudioPlayerStatus,
 	createAudioResource,
+	VoiceConnectionStatus,
 } = require('@discordjs/voice');
 const { MessageActionRow, MessageButton } = require('discord.js');
 const ytdl = require('ytdl-core');
@@ -43,6 +44,85 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
 		adapterCreator: memberVoiceChannel.guild.voiceAdapterCreator,
 	});
 
+	connection.on(VoiceConnectionStatus.Disconnected, async (obj) => {
+		console.log('The bot has disconnected.');
+		connection.destroy();
+	});
+
+	connection.on(VoiceConnectionStatus.Destroyed, async (obj) => {
+		console.log('The connection has been destroyed.');
+		cacheData['player'][guildId] = null;
+	});
+
+	const player = createPlayer(guildId, connection);
+
+	connection.subscribe(player);
+};
+
+const connect = async (guildId, memberVoiceChannel) => {
+	if (!memberVoiceChannel) {
+		return ConnectionStatus.ERROR_NOT_IN_CHANNEL;
+	}
+
+	var connection = getVoiceConnection(guildId);
+
+	if (connection === undefined) {
+		startConnecting(guildId, memberVoiceChannel);
+
+		return ConnectionStatus.SUCCESS;
+	}
+
+	if (memberVoiceChannel.id !== connection.joinConfig.channelId) {
+		startConnecting(guildId, memberVoiceChannel);
+
+		return ConnectionStatus.SUCCESS_JOINED_FROM_OTHER_CHANNEL;
+	}
+
+	if (memberVoiceChannel.id === connection.joinConfig.channelId) {
+		return ConnectionStatus.SUCCESS_ALREADY_JOINED;
+	}
+
+	return ConnectionStatus.ERROR_UNKNOWN;
+};
+
+const getNextResource = async (guildId) => {
+	const queue = await retrieveData(guildId, 'queue');
+
+	if (queue.length != 0) {
+		const first = queue.shift();
+		queue.push(first);
+		const url = queue[0]['url'];
+		const title = queue[0]['title'];
+
+		const status = await setData(guildId, 'queue', queue);
+		if (!status) {
+			console.log('An error of saving queue to guildData.json occurred.');
+
+			return null;
+		}
+
+		const resource = await createResource(url, title);
+
+		return resource;
+	}
+};
+
+const createResource = async (url, title) => {
+	const stream = ytdl(url, {
+		filter: 'audioonly',
+		quality: 'lowestaudio',
+		dlChunkSize: 0,
+	});
+
+	return (resource = createAudioResource(stream, {
+		metadata: {
+			title: title,
+			url: url,
+		},
+	}));
+};
+
+const createPlayer = (guildId, connection) => {
 	const player = createAudioPlayer({
 		behaviors: {
 			noSubscriber: NoSubscriberBehavior.Pause,
@@ -135,7 +215,9 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
 						const resource = await getNextResource(guildId);
 
 						if (resource) {
-							player.play(resource);
+							const newPlayer = createPlayer(guildId, connection);
+							connection.subscribe(newPlayer);
+							newPlayer.play(resource);
 							collector.stop();
 						} else {
 							console.log('Unable to find the resource.');
@@ -148,7 +230,10 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
 							)}, you are not in the same channel as Smoothie! Join the voice channel before clicking the 'Next Song' button!`
 						);
 						const errorMessage = await interaction.channel
-							.send({ embeds: [embed.embed], files: embed.files })
+							.send({
+								embeds: [embed.embed],
+								files: embed.files,
+							})
 							.catch((err) => {
 								console.error(err);
 							});
@@ -176,7 +261,9 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
 		const resource = await getNextResource(guildId);
 
 		if (resource) {
-			player.play(resource);
+			const newPlayer = createPlayer(guildId, connection);
+			connection.subscribe(newPlayer);
+			newPlayer.play(resource);
 		} else {
 			console.log('Unable to find the resource.');
 		}
@@ -210,77 +297,17 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
 		const resource = await getNextResource(guildId);
 
 		if (resource) {
-			player.play(resource);
+			const newPlayer = createPlayer(guildId, connection);
+			connection.subscribe(newPlayer);
+			newPlayer.play(resource);
 		} else {
 			console.log('Unable to find the resource.');
 		}
 	});
 
 	cacheData['player'][guildId] = player;
-	connection.subscribe(player);
-};
 
-const connect = async (guildId, memberVoiceChannel) => {
-	if (!memberVoiceChannel) {
-		return ConnectionStatus.ERROR_NOT_IN_CHANNEL;
-	}
-
-	var connection = getVoiceConnection(guildId);
-
-	if (connection === undefined) {
-		startConnecting(guildId, memberVoiceChannel);
-
-		return ConnectionStatus.SUCCESS;
-	}
-
-	if (memberVoiceChannel.id !== connection.joinConfig.channelId) {
-		startConnecting(guildId, memberVoiceChannel);
-
-		return ConnectionStatus.SUCCESS_JOINED_FROM_OTHER_CHANNEL;
-	}
-
-	if (memberVoiceChannel.id === connection.joinConfig.channelId) {
-		return ConnectionStatus.SUCCESS_ALREADY_JOINED;
-	}
-
-	return ConnectionStatus.ERROR_UNKNOWN;
-};
-
-const getNextResource = async (guildId) => {
-	const queue = await retrieveData(guildId, 'queue');
-
-	if (queue.length != 0) {
-		const first = queue.shift();
-		queue.push(first);
-		const url = queue[0]['url'];
-		const title = queue[0]['title'];
-
-		const status = await setData(guildId, 'queue', queue);
-		if (!status) {
-			console.log('An error of saving queue to guildData.json occurred.');
-
-			return null;
-		}
-
-		const resource = await createResource(url, title);
-
-		return resource;
-	}
-};
-
-const createResource = async (url, title) => {
-	const stream = ytdl(url, {
-		filter: 'audioonly',
-		quality: 'lowestaudio',
-		dlChunkSize: 0,
-	});
-
-	return (resource = createAudioResource(stream, {
-		metadata: {
-			title: title,
-			url: url,
-		},
-	}));
+	return player;
 };
 
 module.exports = {
@@ -289,4 +316,5 @@ module.exports = {
 	ConnectionStatus,
 	connect,
 	isSameVoiceChannel,
+	createPlayer,
 };
