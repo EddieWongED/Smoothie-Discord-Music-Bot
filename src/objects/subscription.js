@@ -7,6 +7,7 @@ const {
 	createAudioResource,
 	VoiceConnectionStatus,
 } = require('@discordjs/voice');
+const { stream } = require('play-dl');
 const { MessageActionRow, MessageButton } = require('discord.js');
 const ytdl = require('ytdl-core');
 const cacheData = require('../../data/cacheData.js');
@@ -108,13 +109,10 @@ const getNextResource = async (guildId) => {
 };
 
 const createResource = async (url, title) => {
-	const stream = ytdl(url, {
-		filter: 'audioonly',
-		quality: 'lowestaudio',
-		dlChunkSize: 0,
-	});
+	const playStream = await stream(url);
 
-	return (resource = createAudioResource(stream, {
+	return (resource = createAudioResource(playStream.stream, {
+		inputType: playStream.type,
 		metadata: {
 			title: title,
 			url: url,
@@ -131,7 +129,6 @@ const createPlayer = (guildId, connection) => {
 	});
 
 	player.on(AudioPlayerStatus.Playing, async (obj) => {
-		console.log('Playing');
 		console.log(
 			`${client.guilds.cache.get(guildId).name} is playing: ${
 				obj.resource.metadata.title
@@ -261,7 +258,6 @@ const createPlayer = (guildId, connection) => {
 	});
 
 	player.on(AudioPlayerStatus.Idle, async (audio) => {
-		console.log('Idling');
 		const resource = await getNextResource(guildId);
 
 		if (resource) {
@@ -274,8 +270,6 @@ const createPlayer = (guildId, connection) => {
 	});
 
 	player.on('error', async (error) => {
-		console.log('Erroring');
-
 		if (error.code === 410) {
 			const channelId = await retrieveData(guildId, 'respondChannelId');
 			if (channelId) {
