@@ -275,6 +275,7 @@ const createPlayer = (guildId, connection) => {
 
 	player.on('error', async (error) => {
 		console.log('Erroring');
+
 		if (error.code === 410) {
 			const channelId = await retrieveData(guildId, 'respondChannelId');
 			if (channelId) {
@@ -298,17 +299,6 @@ const createPlayer = (guildId, connection) => {
 		console.error(
 			`Error: ${error.resource.metadata.title} ${error} ${error.code}`
 		);
-		const resource = await getNextResource(guildId);
-
-		if (resource) {
-			const newPlayer = createPlayer(guildId, connection);
-			connection.subscribe(newPlayer);
-			newPlayer.play(resource);
-
-			await wait(1000);
-		} else {
-			console.log('Unable to find the resource.');
-		}
 	});
 
 	cacheData['player'][guildId] = player;
