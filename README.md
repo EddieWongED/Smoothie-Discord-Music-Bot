@@ -1,6 +1,6 @@
 # Smoothie - a discord music bot :musical_note:
 
-A discord music bot that uses discord.js v13 to program. For personal use only. Only suitable for guild that is for a small group of friend.
+A discord music bot that uses discord.js v13 to program. For personal use only. Only suitable for a guild with a small group of friends.
 
 Give a :heartbeat: and :star: if this bot helps!
 
@@ -9,6 +9,9 @@ Give a :heartbeat: and :star: if this bot helps!
 ![Playing Now Photo](screenshot/playing_now.png)
 
 ![Queue Photo](screenshot/queue.png)
+
+-   Auto rejoin the voice channel when there is a server update / server crashes (Heroku will restart the server every 24 hours).
+-   Auto pause and unpause when there is no one in the voice channel / someone joins the voice channel.
 
 ## Commands :keyboard:
 
@@ -51,20 +54,23 @@ Remark: Since Heroku filesystem is ephemeral (any changes to the filesystem whil
 
 1. Register a [MongoDB Altas](https://www.mongodb.com/cloud/atlas/register) account.
 2. Create a cluster.
-3. Create a database named `smoothie` and collection named with `guilds`.  
+3. On `Databases` tab, click `Browse Collections`.  
+   ![Browse Collections](screenshot/database_browse_collections.png)
+4. Click `Add My Own Data`.
+5. Create a database named `smoothie` and collection named with `guilds`.  
    ![Queue Photo](screenshot/cluster_page.png)
-4. On the left, click `Database Access`. Then click `ADD NEW DATABASE USER`.
-5. Click `Password` as `Authentication Method` and type in `user` (e.g. `user1`) and password (e.g. `user1234`) (Use more secure password!). Click `Read and write to any database` in `Build-in Role` and finally click `Add User`.
-6. On the left, click `Network Access`. Then click `ADD IP ADDRESS`.
-7. Type in `0.0.0.0/0` in `Access List Entry` and `All` in `Comment` and click `Confirm`. This will enable Heroku to access your database. (`0.0.0.0/0` will able all IP to access you database).
-8. Go to `Databases` page and click `Connect` in your cluster tab.  
-   ![Queue Photo](screenshot/database_connect.png)
-9. Click `Connect your application`.
-10. Choose the `DRIVER` as `Node.js` and `VERSION` as `4.0 or later`.
-11. Copy the URL in step 2.
-12. Replace `<password>` with the password you just entered (e.g. `user1234`) and replace `<username>` with the user you just eneter (e.g. `user1`). Replace `myFirstDatabase` with the name of the database (i.e. `smoothie` if you are following the guide).
-13. The URL will be the value of the environment variable `MONGODBURL`!
-14. Now you can setup Heroku!
+6. On the left, click `Database Access`. Then click `ADD NEW DATABASE USER`.
+7. Click `Password` as `Authentication Method` and type in `user` (e.g. `user1`) and password (e.g. `user1234`) (Use more secure password!). Click `Read and write to any database` in `Build-in Role` and finally click `Add User`.
+8. On the left, click `Network Access`. Then click `ADD IP ADDRESS`.
+9. Type in `0.0.0.0/0` in `Access List Entry` and `All` in `Comment` and click `Confirm`. This will enable Heroku to access your database. (`0.0.0.0/0` will able all IP to access you database).
+10. Go to `Databases` page and click `Connect` in your cluster tab.  
+    ![Database Connect](screenshot/database_connect.png)
+11. Click `Connect your application`.
+12. Choose the `DRIVER` as `Node.js` and `VERSION` as `4.0 or later`.
+13. Copy the URL in step 2.
+14. Replace `<password>` with the password you just entered (e.g. `user1234`) and replace `<username>` with the user you just eneter (e.g. `user1`). Replace `myFirstDatabase` with the name of the database (i.e. `smoothie` if you are following the guide).
+15. The URL will be the value of the environment variable `MONGODBURL`!
+16. Now you can setup Heroku!
 
 #### Hosting on Heroku
 
@@ -83,9 +89,8 @@ Remark: Since Heroku filesystem is ephemeral (any changes to the filesystem whil
 
 -   Add alias to commands.
 -   Add swap, pause, resume commands.
--   Add auto reconnnect.
 -   Add message line command (alongside with slash command).
 
 ## Bug :lady_beetle:
 
--   Sometimes you playing now message will pop twice if you use `/join`.
+-   Sometimes you playing now message will pop twice when the first music is played.

@@ -11,6 +11,8 @@ const checkGuildDataExist = async (guildId) => {
 			for (guildDataKey of guildDataKeys) {
 				if (guildDataKey == 'queue') {
 					subDataObject['queue'] = [];
+				} else if (guildDataKey == 'guildId') {
+					subDataObject['guildId'] = guildId;
 				} else {
 					subDataObject[guildDataKey] = null;
 				}

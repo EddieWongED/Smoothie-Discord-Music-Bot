@@ -1,19 +1,10 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { getVoiceConnection } = require('@discordjs/voice');
 const { connect, ConnectionStatus } = require('../../objects/connection.js');
-const { createAudioPlayer } = require('../../objects/audioPlayer.js');
-const { createAudioResource } = require('../../objects/audioResource.js');
 const {
 	loadingEmbed,
 	errorEmbed,
 	successEmbed,
-	neturalEmbed,
 } = require('../../objects/embed.js');
-const cacheData = require('../../../data/cacheData.js');
-const { retrieveData } = require('../../utils/changeData.js');
-const { AudioPlayerStatus } = require('@discordjs/voice');
-
-const wait = require('util').promisify(setTimeout);
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -92,56 +83,5 @@ module.exports = {
 					});
 				return;
 		}
-
-		await wait(1000);
-
-		const player = cacheData['player'][interaction.guildId];
-		const queue = await retrieveData(interaction.guildId, 'queue');
-
-		if (
-			queue.length >= 1 &&
-			player.state.status == AudioPlayerStatus.Idle
-		) {
-			const resource = await createAudioResource(
-				queue[0]['url'],
-				queue[0]['title']
-			);
-			if (resource != null) {
-				const connection = getVoiceConnection(interaction.guildId);
-				if (connection) {
-					const newPlayer = createAudioPlayer(
-						interaction.guildId,
-						connection
-					);
-					connection.subscribe(newPlayer);
-					newPlayer.play(resource);
-					embed = successEmbed(
-						'Music!',
-						"Seem like you've got something on the queue already! Music time!"
-					);
-				} else {
-					embed = errorEmbed(
-						'Unknown error occurred!',
-						'A problem that the developer do not know wtf just happened.'
-					);
-				}
-			} else {
-				embed = errorEmbed(
-					'Unknown error occurred!',
-					'A problem that the developer do not know wtf just happened.'
-				);
-			}
-		} else {
-			embed = neturalEmbed(
-				"Seem like you don't have anything in the queue yet.",
-				'Use /play or /playloopplaylist to add music to the queue!'
-			);
-		}
-
-		await interaction
-			.followUp({ embeds: [embed.embed], files: embed.files })
-			.catch((err) => {
-				console.error(err);
-			});
 	},
 };

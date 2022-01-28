@@ -1,4 +1,5 @@
 const guildDataKeys = [
+	'guildId',
 	'respondChannelId',
 	'voiceChannelId',
 	'playingNowMessageId',

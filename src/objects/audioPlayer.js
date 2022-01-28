@@ -65,11 +65,15 @@ const createAudioPlayer = (guildId, connection) => {
 				const time = parseInt(info.videoDetails.lengthSeconds) * 1000;
 
 				let embed = await playingNowEmbed(guildId);
-				const message = await channel.send({
-					embeds: [embed.embed],
-					files: embed.files,
-					components: [row],
-				});
+				const message = await channel
+					.send({
+						embeds: [embed.embed],
+						files: embed.files,
+						components: [row],
+					})
+					.catch((err) => {
+						console.error(err);
+					});
 
 				if (message) {
 					const status = await setData(
@@ -185,6 +189,12 @@ const createAudioPlayer = (guildId, connection) => {
 
 		console.error(
 			`Error: ${error.resource.metadata.title} ${error} ${error.code}`
+		);
+	});
+
+	player.on(voice.AudioPlayerStatus.Paused, (obj) => {
+		console.log(
+			`${client.guilds.cache.get(guildId).name}'s music has been paused.`
 		);
 	});
 
