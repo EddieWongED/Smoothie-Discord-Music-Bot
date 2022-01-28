@@ -11,6 +11,7 @@ module.exports = {
 	name: 'voiceStateUpdate',
 	once: false,
 	async execute(oldState, newState) {
+		console.log('Detected Voice Channel Changes.');
 		const guildId = newState.guild.id;
 		const connection = getVoiceConnection(guildId);
 		if (connection) {
