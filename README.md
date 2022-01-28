@@ -57,7 +57,7 @@ Remark: Since Heroku filesystem is ephemeral (any changes to the filesystem whil
 5. Click `Password` as `Authentication Method` and type in `user` (e.g. `user1`) and password (e.g. `user1234`) (Use more secure password!). Click `Read and write to any database` in `Build-in Role` and finally click `Add User`.
 6. On the left, click `Network Access`. Then click `ADD IP ADDRESS`.
 7. Type in `0.0.0.0/0` in `Access List Entry` and `All` in `Comment` and click `Confirm`. This will enable Heroku to access your database. (`0.0.0.0/0` will able all IP to access you database).
-8. Go base to `Databases` page and click `Connect` in your cluster tab.  
+8. Go to `Databases` page and click `Connect` in your cluster tab.  
    ![Queue Photo](screenshot/database_connect.png)
 9. Click `Connect your application`.
 10. Choose the `DRIVER` as `Node.js` and `VERSION` as `4.0 or later`.
