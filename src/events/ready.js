@@ -1,6 +1,6 @@
 const { getFiles } = require('../utils/getFiles.js');
 const { retrieveData } = require('../utils/changeData.js');
-const { getVoiceConnection, AudioPlayerStatus } = require('@discordjs/voice');
+const { getVoiceConnection } = require('@discordjs/voice');
 const client = require('../index.js');
 const {
 	neturalEmbed,
@@ -9,10 +9,8 @@ const {
 } = require('../objects/embed.js');
 const { connect, ConnectionStatus } = require('../objects/connection.js');
 const { createAudioPlayer } = require('../objects/audioPlayer.js');
-const { createAudioResource } = require('../objects/audioResource.js');
 const cacheData = require('../../data/cacheData.js');
 
-const wait = require('util').promisify(setTimeout);
 module.exports = {
 	name: 'ready',
 	once: true,
@@ -76,6 +74,15 @@ module.exports = {
 											.catch((err) => {
 												console.error(err);
 											});
+										const connection =
+											getVoiceConnection(guildId);
+
+										const player = createAudioPlayer(
+											guildId,
+											connection
+										);
+										cacheData['player'][guildId] = player;
+										connection.subscribe(player);
 										break;
 									default:
 										embed = errorEmbed(

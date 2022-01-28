@@ -11,7 +11,11 @@ module.exports = {
 	name: 'voiceStateUpdate',
 	once: false,
 	async execute(oldState, newState) {
-		console.log('Detected Voice Channel Changes.');
+		console.log(
+			`Detected Voice Channel Changes in ${
+				client.guilds.cache.get(newState.guild.id).name
+			}: ${newState.member.user.username} has joined.`
+		);
 		const guildId = newState.guild.id;
 		const connection = getVoiceConnection(guildId);
 		if (connection) {
