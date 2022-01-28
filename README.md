@@ -51,18 +51,20 @@ Remark: Since Heroku filesystem is ephemeral (any changes to the filesystem whil
 
 1. Register a [MongoDB Altas](https://www.mongodb.com/cloud/atlas/register) account.
 2. Create a cluster.
-3. Create a database named `smoothie` and the collection is named with `guilds`.  
+3. Create a database named `smoothie` and collection named with `guilds`.  
    ![Queue Photo](screenshot/cluster_page.png)
 4. On the left, click `Database Access`. Then click `ADD NEW DATABASE USER`.
-5. Click `Password` as `Authentication Method `and type in the `user` (e.g. `user1`) and and a password (e.g. `user1234`) (Use more secure password!). Click `Read and write to any database` in `Build-in Role` and finally click `Add User`.
-6. Go base to `Databases` page and click `Connect` in your cluster tab.  
+5. Click `Password` as `Authentication Method` and type in `user` (e.g. `user1`) and password (e.g. `user1234`) (Use more secure password!). Click `Read and write to any database` in `Build-in Role` and finally click `Add User`.
+6. On the left, click `Network Access`. Then click `ADD IP ADDRESS`.
+7. Type in `0.0.0.0/0` in `Access List Entry` and `All` in `Comment` and click `Confirm`. This will enable Heroku to access your database. (`0.0.0.0/0` will able all IP to access you database).
+8. Go base to `Databases` page and click `Connect` in your cluster tab.  
    ![Queue Photo](screenshot/database_connect.png)
-7. Click `Connect your application`.
-8. Choose the `DRIVER` as `Node.js` and `VERSION` as `4.0 or later`.
-9. Copy the URL in step 2.
-10. Replace `<password>` with the password you just entered (e.g. `user1234`) and replace `<username>` with the user you just eneter (e.g. `user1`). Replace `myFirstDatabase` with the name of the database (i.e. `smoothie` if you are following the guide).
-11. The URL will be the value of the environment variable `MONGODBURL`!
-12. Now you can setup Heroku!
+9. Click `Connect your application`.
+10. Choose the `DRIVER` as `Node.js` and `VERSION` as `4.0 or later`.
+11. Copy the URL in step 2.
+12. Replace `<password>` with the password you just entered (e.g. `user1234`) and replace `<username>` with the user you just eneter (e.g. `user1`). Replace `myFirstDatabase` with the name of the database (i.e. `smoothie` if you are following the guide).
+13. The URL will be the value of the environment variable `MONGODBURL`!
+14. Now you can setup Heroku!
 
 #### Hosting on Heroku
 
