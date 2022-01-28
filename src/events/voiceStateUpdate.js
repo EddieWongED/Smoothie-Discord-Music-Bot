@@ -19,23 +19,23 @@ module.exports = {
 				connection.joinConfig.channelId
 			);
 			if (voiceChannel.members.size === 1) {
-				if (!newState.member.user.bot) {
-					const player = cacheData['player'][guildId];
-					if (player) {
-						const pause = player.pause();
-						if (pause) {
-							const channelId = await retrieveData(
-								guildId,
-								'respondChannelId'
-							);
-							if (channelId) {
-								const channel =
-									client.channels.cache.get(channelId);
-								if (channel) {
-									let embed = neturalEmbed(
-										'No one want to listen to Smoothie anymore...',
-										'Therefore, she stop singing. She will resume if someone joins the voice channel.'
-									);
+				const player = cacheData['player'][guildId];
+				if (player) {
+					const pause = player.pause();
+					if (pause) {
+						const channelId = await retrieveData(
+							guildId,
+							'respondChannelId'
+						);
+						if (channelId) {
+							const channel =
+								client.channels.cache.get(channelId);
+							if (channel) {
+								let embed = neturalEmbed(
+									'No one want to listen to Smoothie anymore...',
+									'Therefore, she stop singing. She will resume if someone joins the voice channel.'
+								);
+								if (!newState.member.user.bot) {
 									await channel
 										.send({
 											embeds: [embed.embed],
