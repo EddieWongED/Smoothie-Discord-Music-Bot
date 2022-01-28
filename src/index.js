@@ -1,6 +1,8 @@
 const { Client, Collection, Intents } = require('discord.js');
 const { getFiles } = require('./utils/getFiles.js');
+const { connectDB, importFromDBToLocalJSON } = require('./mongoDB.js');
 const dotenv = require('dotenv');
+const configs = require('../configs.json');
 
 dotenv.config();
 
@@ -41,6 +43,19 @@ getFiles('./src/events')
 	})
 	.catch((e) => console.error(e));
 
-client.login(process.env.TOKEN);
-
+// Connect to database
+if (configs.useMongoDB) {
+	connectDB()
+		.then(async (result) => {
+			const success = await importFromDBToLocalJSON();
+			if (result) {
+				client.login(process.env.TOKEN);
+			}
+		})
+		.catch((err) => {
+			console.error(err);
+		});
+} else {
+	client.login(process.env.TOKEN);
+}
 module.exports = client;

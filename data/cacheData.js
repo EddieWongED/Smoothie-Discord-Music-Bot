@@ -1,5 +1,5 @@
 const cacheData = {
-	'player': {},
-}
+	player: {},
+};
 
 module.exports = cacheData;

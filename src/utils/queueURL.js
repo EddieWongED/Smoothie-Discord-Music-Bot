@@ -1,10 +1,10 @@
 const ytdl = require('ytdl-core');
 const youtubedl = require('youtube-dl-exec');
-const { createResource, createPlayer } = require('../objects/subscription.js');
+const { createAudioPlayer } = require('../objects/audioPlayer.js');
+const { createAudioResource } = require('../objects/audioResource.js');
 const cacheData = require('../../data/cacheData.js');
 const { AudioPlayerStatus, getVoiceConnection } = require('@discordjs/voice');
 const { retrieveData, setData } = require('../utils/changeData.js');
-const wait = require('util').promisify(setTimeout);
 
 const QueueVideoStatus = {
 	SUCCESS: 0,
@@ -95,14 +95,14 @@ const queuePlaylist = async (guildId, url) => {
 			queue.length >= 1 &&
 			player.state.status == AudioPlayerStatus.Idle
 		) {
-			const resource = await createResource(
+			const resource = await createAudioResource(
 				queue[0]['url'],
 				queue[0]['title']
 			);
 			if (resource != null) {
 				const connection = getVoiceConnection(guildId);
 				if (connection) {
-					const newPlayer = createPlayer(guildId, connection);
+					const newPlayer = createAudioPlayer(guildId, connection);
 					connection.subscribe(newPlayer);
 					newPlayer.play(resource);
 				}

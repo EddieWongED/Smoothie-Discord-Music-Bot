@@ -1,10 +1,8 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { getVoiceConnection } = require('@discordjs/voice');
-const {
-	connect,
-	ConnectionStatus,
-	createPlayer,
-} = require('../../objects/subscription.js');
+const { connect, ConnectionStatus } = require('../../objects/connection.js');
+const { createAudioPlayer } = require('../../objects/audioPlayer.js');
+const { createAudioResource } = require('../../objects/audioResource.js');
 const {
 	loadingEmbed,
 	errorEmbed,
@@ -14,7 +12,7 @@ const {
 const cacheData = require('../../../data/cacheData.js');
 const { retrieveData } = require('../../utils/changeData.js');
 const { AudioPlayerStatus } = require('@discordjs/voice');
-const { createResource } = require('../../objects/subscription.js');
+
 const wait = require('util').promisify(setTimeout);
 
 module.exports = {
@@ -104,14 +102,14 @@ module.exports = {
 			queue.length >= 1 &&
 			player.state.status == AudioPlayerStatus.Idle
 		) {
-			const resource = await createResource(
+			const resource = await createAudioResource(
 				queue[0]['url'],
 				queue[0]['title']
 			);
 			if (resource != null) {
 				const connection = getVoiceConnection(interaction.guildId);
 				if (connection) {
-					const newPlayer = createPlayer(
+					const newPlayer = createAudioPlayer(
 						interaction.guildId,
 						connection
 					);

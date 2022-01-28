@@ -1,14 +1,7 @@
-const {
-	getVoiceConnection,
-	joinVoiceChannel,
-	createAudioPlayer,
-	NoSubscriberBehavior,
-	AudioPlayerStatus,
-	createAudioResource,
-	VoiceConnectionStatus,
-} = require('@discordjs/voice');
-const { stream } = require('play-dl');
+const voice = require('@discordjs/voice');
 const { MessageActionRow, MessageButton } = require('discord.js');
+const { isSameVoiceChannel } = require('../utils/isSameVoiceChannel.js');
+const { getNextAudioResource } = require('./audioResource.js');
 const ytdl = require('ytdl-core');
 const cacheData = require('../../data/cacheData.js');
 const { retrieveData, setData } = require('../utils/changeData.js');
@@ -17,118 +10,15 @@ const { playingNowEmbed, errorEmbed } = require('../objects/embed.js');
 const wait = require('util').promisify(setTimeout);
 const { userMention } = require('@discordjs/builders');
 
-const ConnectionStatus = {
-	SUCCESS: 0,
-	SUCCESS_ALREADY_JOINED: 1,
-	SUCCESS_JOINED_FROM_OTHER_CHANNEL: 2,
-	ERROR_NOT_IN_CHANNEL: 3,
-	ERROR_UNKNOWN: 4,
-};
-
-const isSameVoiceChannel = (guildId, memberVoiceChannel) => {
-	if (memberVoiceChannel) {
-		const connection = getVoiceConnection(guildId);
-		if (connection) {
-			if (memberVoiceChannel.id === connection.joinConfig.channelId) {
-				return true;
-			}
-		}
-	}
-
-	return false;
-};
-
-const startConnecting = async (guildId, memberVoiceChannel) => {
-	const connection = joinVoiceChannel({
-		channelId: memberVoiceChannel.id,
-		guildId: memberVoiceChannel.guild.id,
-		adapterCreator: memberVoiceChannel.guild.voiceAdapterCreator,
-	});
-
-	connection.on(VoiceConnectionStatus.Disconnected, async (obj) => {
-		console.log('The bot has disconnected.');
-		connection.destroy();
-	});
-
-	connection.on(VoiceConnectionStatus.Destroyed, async (obj) => {
-		console.log('The connection has been destroyed.');
-		cacheData['player'][guildId] = null;
-	});
-
-	const player = createPlayer(guildId, connection);
-
-	connection.subscribe(player);
-};
-
-const connect = async (guildId, memberVoiceChannel) => {
-	if (!memberVoiceChannel) {
-		return ConnectionStatus.ERROR_NOT_IN_CHANNEL;
-	}
-
-	var connection = getVoiceConnection(guildId);
-
-	if (connection === undefined) {
-		startConnecting(guildId, memberVoiceChannel);
-
-		return ConnectionStatus.SUCCESS;
-	}
-
-	if (memberVoiceChannel.id !== connection.joinConfig.channelId) {
-		startConnecting(guildId, memberVoiceChannel);
-
-		return ConnectionStatus.SUCCESS_JOINED_FROM_OTHER_CHANNEL;
-	}
-
-	if (memberVoiceChannel.id === connection.joinConfig.channelId) {
-		return ConnectionStatus.SUCCESS_ALREADY_JOINED;
-	}
-
-	return ConnectionStatus.ERROR_UNKNOWN;
-};
-
-const getNextResource = async (guildId) => {
-	const queue = await retrieveData(guildId, 'queue');
-
-	if (queue.length != 0) {
-		const first = queue.shift();
-		queue.push(first);
-		const url = queue[0]['url'];
-		const title = queue[0]['title'];
-
-		const status = await setData(guildId, 'queue', queue);
-		if (!status) {
-			console.log('An error of saving queue to guildData.json occurred.');
-
-			return null;
-		}
-
-		const resource = await createResource(url, title);
-
-		return resource;
-	}
-};
-
-const createResource = async (url, title) => {
-	const playStream = await stream(url);
-
-	return (resource = createAudioResource(playStream.stream, {
-		inputType: playStream.type,
-		metadata: {
-			title: title,
-			url: url,
-		},
-	}));
-};
-
-const createPlayer = (guildId, connection) => {
-	const player = createAudioPlayer({
+const createAudioPlayer = (guildId, connection) => {
+	const player = voice.createAudioPlayer({
 		behaviors: {
-			noSubscriber: NoSubscriberBehavior.Pause,
+			noSubscriber: voice.NoSubscriberBehavior.Pause,
 			maxMissedFrames: 50,
 		},
 	});
 
-	player.on(AudioPlayerStatus.Playing, async (obj) => {
+	player.on(voice.AudioPlayerStatus.Playing, async (obj) => {
 		console.log(
 			`${client.guilds.cache.get(guildId).name} is playing: ${
 				obj.resource.metadata.title
@@ -212,10 +102,13 @@ const createPlayer = (guildId, connection) => {
 							interaction.member.voice.channel
 						)
 					) {
-						const resource = await getNextResource(guildId);
+						const resource = await getNextAudioResource(guildId);
 
 						if (resource) {
-							const newPlayer = createPlayer(guildId, connection);
+							const newPlayer = createAudioPlayer(
+								guildId,
+								connection
+							);
 							connection.subscribe(newPlayer);
 							newPlayer.play(resource);
 							collector.stop();
@@ -257,11 +150,11 @@ const createPlayer = (guildId, connection) => {
 		}
 	});
 
-	player.on(AudioPlayerStatus.Idle, async (audio) => {
-		const resource = await getNextResource(guildId);
+	player.on(voice.AudioPlayerStatus.Idle, async (audio) => {
+		const resource = await getNextAudioResource(guildId);
 
 		if (resource) {
-			const newPlayer = createPlayer(guildId, connection);
+			const newPlayer = createAudioPlayer(guildId, connection);
 			connection.subscribe(newPlayer);
 			newPlayer.play(resource);
 		} else {
@@ -300,11 +193,4 @@ const createPlayer = (guildId, connection) => {
 	return player;
 };
 
-module.exports = {
-	getNextResource,
-	createResource,
-	ConnectionStatus,
-	connect,
-	isSameVoiceChannel,
-	createPlayer,
-};
+module.exports = { createAudioPlayer };

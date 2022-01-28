@@ -1,12 +1,9 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { getVoiceConnection, AudioPlayerStatus } = require('@discordjs/voice');
 const ytdl = require('ytdl-core');
-const {
-	connect,
-	ConnectionStatus,
-	createResource,
-	createPlayer,
-} = require('../../objects/subscription.js');
+const { connect, ConnectionStatus } = require('../../objects/connection.js');
+const { createAudioPlayer } = require('../../objects/audioPlayer.js');
+const { createAudioResource } = require('../../objects/audioResource.js');
 const { retrieveData, setData } = require('../../utils/changeData.js');
 const { queueMusic, QueueVideoStatus } = require('../../utils/queueURL.js');
 const {
@@ -271,14 +268,14 @@ module.exports = {
 				queue.length >= 1 &&
 				(player.state.status == AudioPlayerStatus.Idle || playNow)
 			) {
-				const resource = await createResource(
+				const resource = await createAudioResource(
 					queue[0]['url'],
 					queue[0]['title']
 				);
 				if (resource != null) {
 					const connection = getVoiceConnection(interaction.guildId);
 					if (connection) {
-						const newPlayer = createPlayer(
+						const newPlayer = createAudioPlayer(
 							interaction.guildId,
 							connection
 						);

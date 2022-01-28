@@ -1,11 +1,6 @@
 const fs = require('fs').promises;
-
-const subData = [
-	'respondChannelId',
-	'playingNowMessageId',
-	'queueMessageId',
-	'queue',
-];
+const { saveDataToDB } = require('../mongoDB.js');
+const guildDataKeys = require('../const/guildDataKeys.js');
 
 const checkGuildDataExist = async (guildId) => {
 	try {
@@ -13,11 +8,11 @@ const checkGuildDataExist = async (guildId) => {
 	} catch (err) {
 		try {
 			const subDataObject = {};
-			for (subDatum of subData) {
-				if (subDatum == 'queue') {
+			for (guildDataKey of guildDataKeys) {
+				if (guildDataKey == 'queue') {
 					subDataObject['queue'] = [];
 				} else {
-					subDataObject[subDatum] = null;
+					subDataObject[guildDataKey] = null;
 				}
 			}
 
@@ -26,6 +21,8 @@ const checkGuildDataExist = async (guildId) => {
 				JSON.stringify(subDataObject, null, 2)
 			);
 			console.log(`/data/guildData/${guildId}.json is created.`);
+
+			const status = await saveDataToDB(guildId, subDataObject);
 		} catch (err) {
 			console.log(
 				`There is an error when creating /data/guildData/${guildId}.json`
@@ -67,6 +64,8 @@ const setData = async (guildId, key, value) => {
 			`./data/guildData/${guildId}.json`,
 			JSON.stringify(data, null, 2)
 		);
+
+		const status = await saveDataToDB(guildId, data);
 	} catch (err) {
 		console.log(err);
 
@@ -102,4 +101,4 @@ const retrieveData = async (guildId, key) => {
 	return data[key];
 };
 
-module.exports = { setData, retrieveData };
+module.exports = { setData, retrieveData, guildDataKeys };
