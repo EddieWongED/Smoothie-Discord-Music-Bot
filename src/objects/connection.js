@@ -48,7 +48,7 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
 	});
 
 	const player = await createAudioPlayer(guildId, connection);
-
+	cacheData['player'][guildId] = player;
 	connection.subscribe(player);
 };
 
