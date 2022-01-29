@@ -99,9 +99,7 @@ module.exports = {
 												connection
 											);
 										connection.subscribe(newPlayer);
-										console.log(
-											'New song is created become someone joined.'
-										);
+										console.log('Player is present.');
 										newPlayer.play(resource);
 									}
 								}
@@ -124,9 +122,7 @@ module.exports = {
 									connection
 								);
 								connection.subscribe(newPlayer);
-								console.log(
-									'New song is created become someone joined.'
-								);
+								console.log('Player is not present.');
 								newPlayer.play(resource);
 							}
 						}
