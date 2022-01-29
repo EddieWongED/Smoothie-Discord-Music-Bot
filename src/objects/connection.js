@@ -46,10 +46,6 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
 			console.log('Failed to write voiceChannelId.');
 		}
 	});
-
-	const player = await createAudioPlayer(guildId, connection);
-	cacheData['player'][guildId] = player;
-	connection.subscribe(player);
 };
 
 const connect = async (guildId, memberVoiceChannel) => {
@@ -60,12 +56,18 @@ const connect = async (guildId, memberVoiceChannel) => {
 	var connection = getVoiceConnection(guildId);
 
 	if (connection === undefined) {
+		const player = await createAudioPlayer(guildId, connection);
+		cacheData['player'][guildId] = player;
+
 		startConnecting(guildId, memberVoiceChannel);
 
 		return ConnectionStatus.SUCCESS;
 	}
 
 	if (memberVoiceChannel.id !== connection.joinConfig.channelId) {
+		const player = await createAudioPlayer(guildId, connection);
+		cacheData['player'][guildId] = player;
+
 		startConnecting(guildId, memberVoiceChannel);
 
 		return ConnectionStatus.SUCCESS_JOINED_FROM_OTHER_CHANNEL;
