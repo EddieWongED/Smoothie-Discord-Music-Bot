@@ -102,10 +102,31 @@ module.exports = {
 											'New song is created become someone joined.'
 										);
 										newPlayer.play(resource);
-
-										await wait(1000);
 									}
 								}
+							}
+						}
+					}
+				} else {
+					const queue = await retrieveData(guildId, 'queue');
+
+					if (queue.length >= 1) {
+						const resource = await createAudioResource(
+							queue[0]['url'],
+							queue[0]['title']
+						);
+						if (resource != null) {
+							const connection = getVoiceConnection(guildId);
+							if (connection) {
+								const newPlayer = createAudioPlayer(
+									guildId,
+									connection
+								);
+								connection.subscribe(newPlayer);
+								console.log(
+									'New song is created become someone joined.'
+								);
+								newPlayer.play(resource);
 							}
 						}
 					}
