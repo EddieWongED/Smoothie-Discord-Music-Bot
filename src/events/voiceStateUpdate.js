@@ -93,10 +93,11 @@ module.exports = {
 									const connection =
 										getVoiceConnection(guildId);
 									if (connection) {
-										const newPlayer = createAudioPlayer(
-											guildId,
-											connection
-										);
+										const newPlayer =
+											await createAudioPlayer(
+												guildId,
+												connection
+											);
 										connection.subscribe(newPlayer);
 										console.log(
 											'New song is created become someone joined.'
@@ -118,7 +119,7 @@ module.exports = {
 						if (resource != null) {
 							const connection = getVoiceConnection(guildId);
 							if (connection) {
-								const newPlayer = createAudioPlayer(
+								const newPlayer = await createAudioPlayer(
 									guildId,
 									connection
 								);

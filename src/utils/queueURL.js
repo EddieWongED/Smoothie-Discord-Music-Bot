@@ -102,7 +102,10 @@ const queuePlaylist = async (guildId, url) => {
 			if (resource != null) {
 				const connection = getVoiceConnection(guildId);
 				if (connection) {
-					const newPlayer = createAudioPlayer(guildId, connection);
+					const newPlayer = await createAudioPlayer(
+						guildId,
+						connection
+					);
 					connection.subscribe(newPlayer);
 					newPlayer.play(resource);
 				}

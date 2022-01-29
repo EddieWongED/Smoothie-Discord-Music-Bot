@@ -77,7 +77,7 @@ module.exports = {
 										const connection =
 											getVoiceConnection(guildId);
 
-										const player = createAudioPlayer(
+										const player = await createAudioPlayer(
 											guildId,
 											connection
 										);

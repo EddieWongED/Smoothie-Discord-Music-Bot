@@ -10,7 +10,7 @@ const { playingNowEmbed, errorEmbed } = require('../objects/embed.js');
 const wait = require('util').promisify(setTimeout);
 const { userMention } = require('@discordjs/builders');
 
-const createAudioPlayer = (guildId, connection) => {
+const createAudioPlayer = async (guildId, connection) => {
 	const player = voice.createAudioPlayer({
 		behaviors: {
 			noSubscriber: voice.NoSubscriberBehavior.Pause,
@@ -109,7 +109,7 @@ const createAudioPlayer = (guildId, connection) => {
 						const resource = await getNextAudioResource(guildId);
 
 						if (resource) {
-							const newPlayer = createAudioPlayer(
+							const newPlayer = await createAudioPlayer(
 								guildId,
 								connection
 							);
@@ -158,7 +158,7 @@ const createAudioPlayer = (guildId, connection) => {
 		const resource = await getNextAudioResource(guildId);
 
 		if (resource) {
-			const newPlayer = createAudioPlayer(guildId, connection);
+			const newPlayer = await createAudioPlayer(guildId, connection);
 			connection.subscribe(newPlayer);
 			newPlayer.play(resource);
 		} else {

@@ -275,7 +275,7 @@ module.exports = {
 				if (resource != null) {
 					const connection = getVoiceConnection(interaction.guildId);
 					if (connection) {
-						const newPlayer = createAudioPlayer(
+						const newPlayer = await createAudioPlayer(
 							interaction.guildId,
 							connection
 						);
