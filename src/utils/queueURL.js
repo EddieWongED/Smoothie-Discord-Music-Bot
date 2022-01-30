@@ -96,6 +96,7 @@ const queuePlaylist = async (guildId, url) => {
 			player.state.status == AudioPlayerStatus.Idle
 		) {
 			const resource = await createAudioResource(
+				guildId,
 				queue[0]['url'],
 				queue[0]['title']
 			);

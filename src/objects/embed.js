@@ -202,6 +202,27 @@ const queueEmbed = async (guildId, page) => {
 	};
 };
 
+const lyricsEmbed = (title, des) => {
+	const xxxhdpiIcon = new MessageAttachment(
+		'./icon/mipmap-xxxhdpi/smoothie.png'
+	);
+	const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
+	const embed = new MessageEmbed()
+		.setColor('#FFFFFF')
+		.setTitle(title)
+		.setDescription(des)
+		.setThumbnail('attachment://smoothie.png')
+		.setTimestamp()
+		.setFooter({
+			text: 'Smoothie - If the result is wrong, try /description to see if there is any lyrics in the Youtube description!',
+			iconURL: 'attachment://smoothie.png',
+		});
+	return {
+		embed: embed,
+		files: [xxxhdpiIcon, hdpiIcon],
+	};
+};
+
 module.exports = {
 	successEmbed,
 	loadingEmbed,
@@ -209,4 +230,5 @@ module.exports = {
 	neturalEmbed,
 	playingNowEmbed,
 	queueEmbed,
+	lyricsEmbed,
 };

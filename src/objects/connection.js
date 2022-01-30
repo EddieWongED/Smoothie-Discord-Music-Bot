@@ -34,7 +34,11 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
 
 	connection.on(VoiceConnectionStatus.Disconnected, async (obj) => {
 		console.log('The bot has disconnected.');
-		connection.destroy();
+		try {
+			connection.destroy();
+		} catch (err) {
+			console.error(err);
+		}
 	});
 
 	connection.on(VoiceConnectionStatus.Destroyed, async (obj) => {

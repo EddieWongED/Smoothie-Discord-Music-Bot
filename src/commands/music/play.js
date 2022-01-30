@@ -269,6 +269,7 @@ module.exports = {
 				(player.state.status == AudioPlayerStatus.Idle || playNow)
 			) {
 				const resource = await createAudioResource(
+					interaction.guildId,
 					queue[0]['url'],
 					queue[0]['title']
 				);

@@ -25,6 +25,8 @@ Give a :heartbeat: and :star: if this bot helps!
 | queue            | Shows the queue.                                                                                                                                                                                                                |
 | shuffle          | Shuffles the queue.                                                                                                                                                                                                             |
 | skip             | Skips the current music.                                                                                                                                                                                                        |
+| lyrics           | Attempts to get the lyrics of the currently-playing song from [Genius](https://genius.com/) (may takes some time to load).                                                                                                      |
+| description      | Gets the Youtube description of the currently-playing music.                                                                                                                                                                    |
 
 ## How to install :computer:
 

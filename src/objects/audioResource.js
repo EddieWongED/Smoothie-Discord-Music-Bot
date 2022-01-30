@@ -18,22 +18,24 @@ const getNextAudioResource = async (guildId) => {
 			return null;
 		}
 
-		const resource = await createAudioResource(url, title);
-
+		const resource = await createAudioResource(guildId, url, title);
 		return resource;
 	}
 };
 
-const createAudioResource = async (url, title) => {
-	const playStream = await stream(url);
-
-	return (resource = voice.createAudioResource(playStream.stream, {
-		inputType: playStream.type,
-		metadata: {
-			title: title,
-			url: url,
-		},
-	}));
+const createAudioResource = async (guildId, url, title) => {
+	try {
+		const playStream = await stream(url);
+		return (resource = voice.createAudioResource(playStream.stream, {
+			inputType: playStream.type,
+			metadata: {
+				title: title,
+				url: url,
+			},
+		}));
+	} catch (err) {
+		return getNextAudioResource(guildId);
+	}
 };
 
 module.exports = { getNextAudioResource, createAudioResource };
