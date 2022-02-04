@@ -4,6 +4,14 @@ const { retrieveData } = require('../utils/changeData.js');
 const { inlineCode } = require('@discordjs/builders');
 
 const successEmbed = (title, des) => {
+	if (title.length > 256) {
+		title = title.substring(0, 253) + '...';
+	}
+
+	if (des.length > 4096) {
+		des = des.substring(0, 4093) + '...';
+	}
+
 	const xxxhdpiIcon = new MessageAttachment(
 		'./icon/mipmap-xxxhdpi/smoothie.png'
 	);
@@ -22,6 +30,14 @@ const successEmbed = (title, des) => {
 };
 
 const loadingEmbed = (title, des) => {
+	if (title.length > 256) {
+		title = title.substring(0, 253) + '...';
+	}
+
+	if (des.length > 4096) {
+		des = des.substring(0, 4093) + '...';
+	}
+
 	const xxxhdpiIcon = new MessageAttachment(
 		'./icon/mipmap-xxxhdpi/smoothie.png'
 	);
@@ -40,6 +56,14 @@ const loadingEmbed = (title, des) => {
 };
 
 const errorEmbed = (title, des) => {
+	if (title.length > 256) {
+		title = title.substring(0, 253) + '...';
+	}
+
+	if (des.length > 4096) {
+		des = des.substring(0, 4093) + '...';
+	}
+
 	const xxxhdpiIcon = new MessageAttachment(
 		'./icon/mipmap-xxxhdpi/smoothie.png'
 	);
@@ -58,6 +82,14 @@ const errorEmbed = (title, des) => {
 };
 
 const neturalEmbed = (title, des) => {
+	if (title.length > 256) {
+		title = title.substring(0, 253) + '...';
+	}
+
+	if (des.length > 4096) {
+		des = des.substring(0, 4093) + '...';
+	}
+
 	const xxxhdpiIcon = new MessageAttachment(
 		'./icon/mipmap-xxxhdpi/smoothie.png'
 	);
@@ -185,6 +217,10 @@ const queueEmbed = async (guildId, page) => {
 		des = `${des}${(page - 1) * 10 + i + 1}: ${inlineCode(titleArr[i])} \n`;
 	}
 
+	if (des.length > 4096) {
+		des = des.substring(0, 4093) + '...';
+	}
+
 	const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
 
 	const embed = new MessageEmbed()
@@ -203,6 +239,14 @@ const queueEmbed = async (guildId, page) => {
 };
 
 const lyricsEmbed = (title, des) => {
+	if (title.length > 256) {
+		title = title.substring(0, 253) + '...';
+	}
+
+	if (des.length > 4096) {
+		des = des.substring(0, 4093) + '...';
+	}
+
 	const xxxhdpiIcon = new MessageAttachment(
 		'./icon/mipmap-xxxhdpi/smoothie.png'
 	);

@@ -264,26 +264,35 @@ module.exports = {
 			const player = cacheData['player'][interaction.guildId];
 			const queue = await retrieveData(interaction.guildId, 'queue');
 
-			if (
-				queue.length >= 1 &&
-				(player.state.status == AudioPlayerStatus.Idle || playNow)
-			) {
-				const resource = await createAudioResource(
-					interaction.guildId,
-					queue[0]['url'],
-					queue[0]['title']
-				);
-				if (resource != null) {
-					const connection = getVoiceConnection(interaction.guildId);
-					if (connection) {
-						const newPlayer = await createAudioPlayer(
-							interaction.guildId,
-							connection
+			if (player) {
+				if (
+					queue.length >= 1 &&
+					(player.state.status == AudioPlayerStatus.Idle || playNow)
+				) {
+					const resource = await createAudioResource(
+						interaction.guildId,
+						queue[0]['url'],
+						queue[0]['title']
+					);
+					if (resource != null) {
+						const connection = getVoiceConnection(
+							interaction.guildId
 						);
-						connection.subscribe(newPlayer);
-						newPlayer.play(resource);
+						if (connection) {
+							const newPlayer = await createAudioPlayer(
+								interaction.guildId,
+								connection
+							);
+							connection.subscribe(newPlayer);
+							newPlayer.play(resource);
+						}
 					}
 				}
+			} else {
+				embed = errorEmbed(
+					'Unknown error occurred!',
+					'A problem that the developer do not know wtf just happened.'
+				);
 			}
 
 			if (followUp) {

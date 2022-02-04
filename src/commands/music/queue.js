@@ -154,13 +154,15 @@ module.exports = {
 		collector.on('collect', async (interaction) => {
 			const queue = await retrieveData(interaction.guildId, 'queue');
 			if (queue.length == 0) {
-				const status = interaction.message.delete();
+				const status = interaction.message.delete().catch((err) => {
+					console.log(err);
+				});
 
-				embed = await errorEmbed(
+				embed = errorEmbed(
 					'There is nothing in the queue',
 					'The queue has been cleared for some reason.'
 				);
-				interaction.channel
+				await interaction.channel
 					.send({ embeds: [embed.embed], files: embed.files })
 					.catch((err) => {
 						console.log(err);
@@ -203,7 +205,6 @@ module.exports = {
 							});
 
 						const pageFilter = (filterInteraction) => {
-							console.log('hi');
 							return (
 								interaction.member.id ===
 								filterInteraction.member.id
