@@ -2,102 +2,104 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { getFiles } = require('../../utils/getFiles.js');
 const fs = require('fs');
 const {
-    loadingEmbed,
-    successEmbed,
-    errorEmbed,
+	loadingEmbed,
+	successEmbed,
+	errorEmbed,
 } = require('../../objects/embed.js');
+const { editReply } = require('../../utils/messageHandler.js');
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('reload')
-        .setDescription('Reload all the commands'),
-    async execute(interaction) {
-        if (interaction.member.id != process.env.MYUSERID) {
-            const embed = errorEmbed(
-                'You think you are good enough to run this command?',
-                'Idiot.'
-            );
-            await interaction
-                .reply({ embeds: [embed.embed], files: embed.files })
-                .catch((err) => {
-                    console.error(err);
-                });
+	data: new SlashCommandBuilder()
+		.setName('reload')
+		.setDescription('Reload all the commands'),
+	async execute(interaction, args) {
+		if (interaction.member.id != process.env.MYUSERID) {
+			const embed = errorEmbed(
+				'You think you are good enough to run this command?',
+				'Idiot.'
+			);
+			await interaction
+				.reply({ embeds: [embed.embed], files: embed.files })
+				.catch((err) => {
+					console.error(err);
+				});
 
-            return;
-        }
+			return;
+		}
 
-        let embed = loadingEmbed(
-            'Attempting to reload commands...',
-            'Please be patient...'
-        );
-        await interaction
-            .reply({ embeds: [embed.embed], files: embed.files })
-            .catch((err) => {
-                console.error(err);
-            });
+		let embed = loadingEmbed(
+			'Attempting to reload commands...',
+			'Please be patient...'
+		);
 
-        const folderDirs = fs
-            .readdirSync('./src')
-            .filter((file) => !file.includes('.'));
+		const mainMessage = await interaction
+			.reply({ embeds: [embed.embed], files: embed.files })
+			.catch((err) => {
+				console.error(err);
+			});
 
-        let followUp = false;
+		const folderDirs = fs
+			.readdirSync('./src')
+			.filter((file) => !file.includes('.'));
 
-        for (const folderDir of folderDirs.reverse()) {
-            const files = await getFiles(`./src/${folderDir}`);
-            const fileDirs = files.filter((file) => file.endsWith('.js'));
+		let followUp = false;
 
-            const fileDirsSuccess = [];
+		for (const folderDir of folderDirs.reverse()) {
+			const files = await getFiles(`./src/${folderDir}`);
+			const fileDirs = files.filter((file) => file.endsWith('.js'));
 
-            for (const fileDir of fileDirs) {
-                try {
-                    delete require.cache[require.resolve(fileDir)];
+			const fileDirsSuccess = [];
 
-                    if (folderDir === 'commands') {
-                        const command = require(fileDir);
-                        interaction.client.commands.set(
-                            command.data.name,
-                            command
-                        );
-                    }
+			for (const fileDir of fileDirs) {
+				try {
+					delete require.cache[require.resolve(fileDir)];
 
-                    fileDirsSuccess.push(fileDir);
-                } catch (err) {
-                    console.error(err);
-                }
-            }
+					if (folderDir === 'commands') {
+						const command = require(fileDir);
+						interaction.client.commands.set(
+							command.data.name,
+							command
+						);
+					}
 
-            let des = '```CSS\n';
+					fileDirsSuccess.push(fileDir);
+				} catch (err) {
+					console.error(err);
+				}
+			}
 
-            for (let i = 0; i < fileDirsSuccess.length; i++) {
-                des =
-                    des +
-                    `${i + 1}: ${fileDirsSuccess[i].substring(
-                        fileDirsSuccess[i].lastIndexOf('\\src') + 1,
-                        fileDirsSuccess[i].length
-                    )}\n`;
-            }
+			let des = '```CSS\n';
 
-            des = des + '```';
+			for (let i = 0; i < fileDirsSuccess.length; i++) {
+				des =
+					des +
+					`${i + 1}: ${fileDirsSuccess[i].substring(
+						fileDirsSuccess[i].lastIndexOf('\\src') + 1,
+						fileDirsSuccess[i].length
+					)}\n`;
+			}
 
-            embed = successEmbed(
-                `Reload success! ${fileDirsSuccess.length} ${folderDir} files were reloaded.`,
-                des
-            );
+			des = des + '```';
 
-            if (followUp) {
-                await interaction
-                    .followUp({ embeds: [embed.embed], files: embed.files })
-                    .catch((err) => {
-                        console.error(err);
-                    });
-            } else {
-                await interaction
-                    .editReply({ embeds: [embed.embed], files: embed.files })
-                    .catch((err) => {
-                        console.error(err);
-                    });
-                followUp = true;
-            }
-        }
-    },
+			embed = successEmbed(
+				`Reload success! ${fileDirsSuccess.length} ${folderDir} files were reloaded.`,
+				des
+			);
+
+			if (followUp) {
+				await interaction.channel
+					.send({ embeds: [embed.embed], files: embed.files })
+					.catch((err) => {
+						console.error(err);
+					});
+			} else {
+				await editReply(
+					args,
+					embed,
+					mainMessage ? mainMessage : interaction
+				);
+				followUp = true;
+			}
+		}
+	},
 };

@@ -12,6 +12,7 @@ Give a :heartbeat: and :star: if this bot helps!
 
 -   Auto rejoin the voice channel when there is a server update / server crashes (Heroku will restart the server every 24 hours).
 -   Auto pause and unpause when there is no one in the voice channel / someone joins the voice channel.
+-   Support both slash command and prefix command! (default: `$`).
 
 ## Commands :keyboard:
 
@@ -27,6 +28,7 @@ Give a :heartbeat: and :star: if this bot helps!
 | skip             | Skips the current music.                                                                                                                                                                                                        |
 | lyrics           | Attempts to get the lyrics of the currently-playing song from [Genius](https://genius.com/) (may takes some time to load).                                                                                                      |
 | description      | Gets the Youtube description of the currently-playing music.                                                                                                                                                                    |
+| prefix           | Change / Show the prefix of your guild (Default: `$`).                                                                                                                                                                          |
 
 ## How to install :computer:
 
@@ -45,8 +47,7 @@ Give a :heartbeat: and :star: if this bot helps!
     | `LOOPPLAYLISTURL` | the URL of a playlist which you want to play via /playloopplaylist.                                                  |
     | `MONGODBURL`      | the URL of MongoDB that links to your database (More detail below). If you not gonna use it, you can leave it blank. |
 
-6. Deploy commands to your guild (immediate effect) and gobally (takes up to an hour) by running `npm run deploycmd`.
-7. Run `npm start`. The bot should up in running right now!
+6. Run `npm start`. The bot should up in running right now!
 
 ## How to run the bot 27/4 :watch:
 
@@ -91,7 +92,6 @@ Remark: Since Heroku filesystem is ephemeral (any changes to the filesystem whil
 
 -   Add alias to commands.
 -   Add swap, pause, resume commands.
--   Add message line command (alongside with slash command).
 
 ## Bug :lady_beetle:
 

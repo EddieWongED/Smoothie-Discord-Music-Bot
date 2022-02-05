@@ -9,17 +9,19 @@ const {
 const { retrieveData, setData } = require('../../utils/changeData.js');
 const { isSameVoiceChannel } = require('../../utils/isSameVoiceChannel.js');
 const wait = require('util').promisify(setTimeout);
+const { editReply } = require('../../utils/messageHandler.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('queue')
 		.setDescription("Shows what's next."),
-	async execute(interaction) {
+	async execute(interaction, args) {
 		let embed = loadingEmbed(
 			'Attempting to load the queue...',
 			'Please be patient...'
 		);
-		await interaction
+
+		const mainMessage = await interaction
 			.reply({ embeds: [embed.embed], files: embed.files })
 			.catch((err) => {
 				console.error(err);
@@ -35,11 +37,11 @@ module.exports = {
 				'You are not in the same voice channel as Smoothie!',
 				'Please join the voice channel before you want to do something!'
 			);
-			await interaction
-				.editReply({ embeds: [embed.embed], files: embed.files })
-				.catch((err) => {
-					console.error(err);
-				});
+			await editReply(
+				args,
+				embed,
+				mainMessage ? mainMessage : interaction
+			);
 
 			return;
 		}
@@ -51,12 +53,11 @@ module.exports = {
 				'No music no fun..',
 				'There is no music in the queue...'
 			);
-			await interaction
-				.editReply({ embeds: [embed.embed], files: embed.files })
-				.catch((err) => {
-					console.error(err);
-				});
-
+			await editReply(
+				args,
+				embed,
+				mainMessage ? mainMessage : interaction
+			);
 			return;
 		}
 
@@ -120,15 +121,29 @@ module.exports = {
 			choosePageButton
 		);
 
-		const message = await interaction
-			.editReply({
-				embeds: [embed.embed],
-				files: embed.files,
-				components: [row],
-			})
-			.catch((err) => {
-				console.error(err);
-			});
+		var message;
+
+		if (args) {
+			message = await mainMessage
+				.edit({
+					embeds: [embed.embed],
+					files: embed.files,
+					components: [row],
+				})
+				.catch((err) => {
+					console.error(err);
+				});
+		} else {
+			message = await interaction
+				.editReply({
+					embeds: [embed.embed],
+					files: embed.files,
+					components: [row],
+				})
+				.catch((err) => {
+					console.error(err);
+				});
+		}
 
 		const status = setData(
 			interaction.guildId,

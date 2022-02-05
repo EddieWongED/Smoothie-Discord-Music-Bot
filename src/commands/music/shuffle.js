@@ -6,17 +6,19 @@ const {
 } = require('../../objects/embed.js');
 const { retrieveData, setData } = require('../../utils/changeData.js');
 const { isSameVoiceChannel } = require('../../utils/isSameVoiceChannel.js');
+const { editReply } = require('../../utils/messageHandler.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('shuffle')
 		.setDescription('Shuffles the queue.'),
-	async execute(interaction) {
+	async execute(interaction, args) {
 		let embed = loadingEmbed(
 			'Attempting to shuffle...',
 			'Please be patient...'
 		);
-		await interaction
+
+		const mainMessage = await interaction
 			.reply({ embeds: [embed.embed], files: embed.files })
 			.catch((err) => {
 				console.error(err);
@@ -32,11 +34,11 @@ module.exports = {
 				'You are not in the same voice channel as Smoothie!',
 				'Please join the voice channel before you want to do something!'
 			);
-			await interaction
-				.editReply({ embeds: [embed.embed], files: embed.files })
-				.catch((err) => {
-					console.error(err);
-				});
+			await editReply(
+				args,
+				embed,
+				mainMessage ? mainMessage : interaction
+			);
 
 			return;
 		}
@@ -51,11 +53,11 @@ module.exports = {
 				'Nothing',
 				'There is nothing in the queue? What do you want to shuffle?'
 			);
-			await interaction
-				.editReply({ embeds: [embed.embed], files: embed.files })
-				.catch((err) => {
-					console.error(err);
-				});
+			await editReply(
+				args,
+				embed,
+				mainMessage ? mainMessage : interaction
+			);
 
 			return;
 		}
@@ -81,10 +83,6 @@ module.exports = {
 			'Successfully Shuffled!',
 			'Guess what is the next music?'
 		);
-		await interaction
-			.editReply({ embeds: [embed.embed], files: embed.files })
-			.catch((err) => {
-				console.error(err);
-			});
+		await editReply(args, embed, mainMessage ? mainMessage : interaction);
 	},
 };

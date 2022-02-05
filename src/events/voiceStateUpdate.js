@@ -11,11 +11,20 @@ module.exports = {
 	name: 'voiceStateUpdate',
 	once: false,
 	async execute(oldState, newState) {
-		console.log(
-			`Detected Voice Channel Changes in ${
-				client.guilds.cache.get(newState.guild.id).name
-			}: ${newState.member.user.username} has joined / left.`
-		);
+		if (newState.channel) {
+			console.log(
+				`${client.guilds.cache.get(newState.guild.id).name}: ${
+					newState.member.user.username
+				} has joined voice channel "${newState.channel.name}".`
+			);
+		} else {
+			console.log(
+				`${client.guilds.cache.get(oldState.guild.id).name}: ${
+					oldState.member.user.username
+				} has left voice channel "${oldState.channel.name}".`
+			);
+		}
+
 		const guildId = newState.guild.id;
 		const connection = getVoiceConnection(guildId);
 		if (connection) {
@@ -100,7 +109,6 @@ module.exports = {
 												connection
 											);
 										connection.subscribe(newPlayer);
-										console.log('Player is present.');
 										newPlayer.play(resource);
 									}
 								}
@@ -124,7 +132,6 @@ module.exports = {
 									connection
 								);
 								connection.subscribe(newPlayer);
-								console.log('Player is not present.');
 								newPlayer.play(resource);
 							}
 						}

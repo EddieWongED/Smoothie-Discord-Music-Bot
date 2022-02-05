@@ -8,19 +8,20 @@ const {
 	successEmbed,
 	errorEmbed,
 } = require('../../objects/embed.js');
-const cacheData = require('../../../data/cacheData.js');
-const { retrieveData, setData } = require('../../utils/changeData.js');
+const { retrieveData } = require('../../utils/changeData.js');
+const { editReply } = require('../../utils/messageHandler.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('skip')
 		.setDescription('Skips the current song because you hate it.'),
-	async execute(interaction) {
+	async execute(interaction, args) {
 		let embed = loadingEmbed(
 			'Attempting to skip the music...',
 			'Please be patient...'
 		);
-		await interaction
+
+		const mainMessage = await interaction
 			.reply({ embeds: [embed.embed], files: embed.files })
 			.catch((err) => {
 				console.error(err);
@@ -36,11 +37,11 @@ module.exports = {
 				'You are not in the same voice channel as Smoothie!',
 				'Please join the voice channel before you want to do something!'
 			);
-			await interaction
-				.editReply({ embeds: [embed.embed], files: embed.files })
-				.catch((err) => {
-					console.error(err);
-				});
+			await editReply(
+				args,
+				embed,
+				mainMessage ? mainMessage : interaction
+			);
 
 			return;
 		}
@@ -66,21 +67,21 @@ module.exports = {
 				'Successfully skipped!',
 				"Seems like you don't like the previous song..."
 			);
-			await interaction
-				.editReply({ embeds: [embed.embed], files: embed.files })
-				.catch((err) => {
-					console.error(err);
-				});
+			await editReply(
+				args,
+				embed,
+				mainMessage ? mainMessage : interaction
+			);
 		} else {
 			embed = errorEmbed(
 				'No music no fun..',
 				'There is no music in the queue...'
 			);
-			await interaction
-				.editReply({ embeds: [embed.embed], files: embed.files })
-				.catch((err) => {
-					console.error(err);
-				});
+			await editReply(
+				args,
+				embed,
+				mainMessage ? mainMessage : interaction
+			);
 		}
 	},
 };

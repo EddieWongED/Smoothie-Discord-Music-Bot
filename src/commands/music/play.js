@@ -14,6 +14,7 @@ const {
 const cacheData = require('../../../data/cacheData.js');
 const { queuePlaylist } = require('../../utils/queueURL.js');
 const wait = require('util').promisify(setTimeout);
+const { editReply } = require('../../utils/messageHandler.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -33,12 +34,80 @@ module.exports = {
 				)
 				.setRequired(true)
 		),
-	async execute(interaction) {
+	async execute(interaction, args, isPlayLoopPlaylist) {
+		var url = null;
+		var playNow = null;
+
+		if (args) {
+			if (args.length === 2) {
+				if (
+					!(
+						args[1].toLowerCase() === 'true' ||
+						args[1].toLowerCase() === 'false'
+					)
+				) {
+					var prefix = await retrieveData(
+						interaction.guildId,
+						'prefix'
+					);
+					if (!prefix) {
+						prefix = '$';
+					}
+
+					let embed = errorEmbed(
+						'Wrong value of play_now!',
+						'For the second argument (`play_now`), if you want to play the music immediately, type `true`, `false` otherwise. If the URL is a playlist it does not matter. \nThe format should be `' +
+							prefix +
+							'play <url> <play_now>`'
+					);
+					await interaction
+						.reply({
+							embeds: [embed.embed],
+							files: embed.files,
+						})
+						.catch((err) => {
+							console.log(err);
+						});
+
+					return;
+				}
+
+				url = args[0];
+				playNow = args[1].toLowerCase() === 'true';
+			} else {
+				var prefix = await retrieveData(interaction.guildId, 'prefix');
+				if (!prefix) {
+					prefix = '$';
+				}
+
+				let embed = errorEmbed(
+					'Not enough / Too much arguments!',
+					'For `play` command, you must specify the Youtube URL first, and then specify if you want to play the music immediately or not. Type `true` if you want, `false` otherwise.\nThe format should be `' +
+						prefix +
+						'play <url> <play_now>`'
+				);
+				await interaction
+					.reply({ embeds: [embed.embed], files: embed.files })
+					.catch((err) => {
+						console.log(err);
+					});
+
+				return;
+			}
+		} else {
+			url = interaction.options.getString('url');
+			if (isPlayLoopPlaylist) {
+				url = process.env.LOOPPLAYLISTURL;
+			}
+			playNow = interaction.options.getBoolean('play_now');
+		}
+
 		let embed = loadingEmbed(
 			'Attempting to play music...',
 			'Please be patient...'
 		);
-		await interaction
+
+		const mainMessage = await interaction
 			.reply({ embeds: [embed.embed], files: embed.files })
 			.catch((err) => {
 				console.error(err);
@@ -58,11 +127,11 @@ module.exports = {
 					'Smoothie joined the voice channel.',
 					'Please welcome her! She is a shy girl.'
 				);
-				await interaction
-					.editReply({ embeds: [embed.embed], files: embed.files })
-					.catch((err) => {
-						console.error(err);
-					});
+				await editReply(
+					args,
+					embed,
+					mainMessage ? mainMessage : interaction
+				);
 				followUp = true;
 				break;
 			case ConnectionStatus.SUCCESS_ALREADY_JOINED:
@@ -72,11 +141,11 @@ module.exports = {
 					'Smoothie joined from another voice channel.',
 					'Please welcome her! She is a shy girl.'
 				);
-				await interaction
-					.editReply({ embeds: [embed.embed], files: embed.files })
-					.catch((err) => {
-						console.error(err);
-					});
+				await editReply(
+					args,
+					embed,
+					mainMessage ? mainMessage : interaction
+				);
 				followUp = true;
 				break;
 			case ConnectionStatus.ERROR_NOT_IN_CHANNEL:
@@ -84,22 +153,22 @@ module.exports = {
 					'You are not in a voice channel!',
 					'dumbass.'
 				);
-				await interaction
-					.editReply({ embeds: [embed.embed], files: embed.files })
-					.catch((err) => {
-						console.error(err);
-					});
+				await editReply(
+					args,
+					embed,
+					mainMessage ? mainMessage : interaction
+				);
 				return;
 			default:
 				embed = errorEmbed(
 					'Unknown error occurred!',
 					'A problem that the developer do not know wtf just happened.'
 				);
-				await interaction
-					.editReply({ embeds: [embed.embed], files: embed.files })
-					.catch((err) => {
-						console.error(err);
-					});
+				await editReply(
+					args,
+					embed,
+					mainMessage ? mainMessage : interaction
+				);
 				return;
 		}
 
@@ -108,20 +177,18 @@ module.exports = {
 		embed = loadingEmbed('Loading the music...', 'Please be patient.');
 
 		if (followUp) {
-			followUpMessage = await interaction
-				.followUp({ embeds: [embed.embed], files: embed.files })
+			followUpMessage = await interaction.channel
+				.send({ embeds: [embed.embed], files: embed.files })
 				.catch((err) => {
 					console.error(err);
 				});
 		} else {
-			await interaction
-				.editReply({ embeds: [embed.embed], files: embed.files })
-				.catch((err) => {
-					console.error(err);
-				});
+			await editReply(
+				args,
+				embed,
+				mainMessage ? mainMessage : interaction
+			);
 		}
-
-		const url = interaction.options.getString('url');
 
 		if (!ytdl.validateURL(url)) {
 			const metadata = await queuePlaylist(interaction.guildId, url);
@@ -143,15 +210,13 @@ module.exports = {
 						console.error(err);
 					});
 			} else {
-				await interaction
-					.editReply({ embeds: [embed.embed], files: embed.files })
-					.catch((err) => {
-						console.error(err);
-					});
+				await editReply(
+					args,
+					embed,
+					mainMessage ? mainMessage : interaction
+				);
 			}
 		} else {
-			const playNow = interaction.options.getBoolean('play_now');
-
 			const status = await queueMusic(interaction.guildId, url);
 
 			switch (status) {
@@ -220,6 +285,13 @@ module.exports = {
 								'The required music is currently playing!',
 								'Did you not noticing that?'
 							);
+							await editReply(
+								args,
+								embed,
+								mainMessage ? mainMessage : interaction
+							);
+
+							return;
 						} else if (index != -1) {
 							const firstItem = queue.shift();
 							queue.push(firstItem);
@@ -302,11 +374,11 @@ module.exports = {
 						console.error(err);
 					});
 			} else {
-				await interaction
-					.editReply({ embeds: [embed.embed], files: embed.files })
-					.catch((err) => {
-						console.error(err);
-					});
+				await editReply(
+					args,
+					embed,
+					mainMessage ? mainMessage : interaction
+				);
 			}
 		}
 	},

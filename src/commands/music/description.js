@@ -9,6 +9,7 @@ const {
 } = require('../../objects/embed.js');
 const cacheData = require('../../../data/cacheData.js');
 const { retrieveData } = require('../../utils/changeData.js');
+const { editReply } = require('../../utils/messageHandler.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -16,12 +17,13 @@ module.exports = {
 		.setDescription(
 			'Gets the Youtube description of the currently-playing music.'
 		),
-	async execute(interaction) {
+	async execute(interaction, args) {
 		let embed = loadingEmbed(
 			'Attempting to get description...',
 			'Please be patient...'
 		);
-		await interaction
+
+		const mainMessage = await interaction
 			.reply({ embeds: [embed.embed], files: embed.files })
 			.catch((err) => {
 				console.error(err);
@@ -37,11 +39,11 @@ module.exports = {
 				'You are not in the same voice channel as Smoothie!',
 				'Please join the voice channel before you want to do something!'
 			);
-			await interaction
-				.editReply({ embeds: [embed.embed], files: embed.files })
-				.catch((err) => {
-					console.error(err);
-				});
+			await editReply(
+				args,
+				embed,
+				mainMessage ? mainMessage : interaction
+			);
 
 			return;
 		}
@@ -55,27 +57,21 @@ module.exports = {
 					`Description: ${videoInfo.videoDetails.title}`,
 					videoInfo.videoDetails.description
 				);
-				await interaction
-					.editReply({
-						embeds: [embed.embed],
-						files: embed.files,
-					})
-					.catch((err) => {
-						console.error(err);
-					});
+				await editReply(
+					args,
+					embed,
+					mainMessage ? mainMessage : interaction
+				);
 			} else {
 				embed = errorEmbed(
 					'No music no fun..',
 					'There is no music in the queue...'
 				);
-				await interaction
-					.editReply({
-						embeds: [embed.embed],
-						files: embed.files,
-					})
-					.catch((err) => {
-						console.error(err);
-					});
+				await editReply(
+					args,
+					embed,
+					mainMessage ? mainMessage : interaction
+				);
 
 				return;
 			}
@@ -84,14 +80,11 @@ module.exports = {
 				'Currently there is nothing is playing!',
 				'Please play something before trying to find its lyrics!'
 			);
-			await interaction
-				.editReply({
-					embeds: [embed.embed],
-					files: embed.files,
-				})
-				.catch((err) => {
-					console.error(err);
-				});
+			await editReply(
+				args,
+				embed,
+				mainMessage ? mainMessage : interaction
+			);
 		}
 	},
 };

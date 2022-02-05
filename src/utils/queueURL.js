@@ -24,10 +24,13 @@ const queueMusic = async (guildId, url) => {
 	const queue = await retrieveData(guildId, 'queue');
 
 	if (!queue.some((e) => e['url'] === videoInfo.videoDetails.video_url)) {
-		queue.push({
+		const queueObject = {
 			title: title,
 			url: videoInfo.videoDetails.video_url,
-		});
+		};
+		if (queueObject) {
+			queue.push(queueObject);
+		}
 
 		const status = await setData(guildId, 'queue', queue);
 		if (!status) {
@@ -70,10 +73,13 @@ const queuePlaylist = async (guildId, url) => {
 			if (ytdl.validateURL(videoURL)) {
 				noOfVideo++;
 				if (!queue.some((e) => e['url'] === videoURL)) {
-					queue.push({
+					const queueObject = {
 						title: title,
 						url: videoURL,
-					});
+					};
+					if (queueObject) {
+						queue.push(queueObject);
+					}
 				} else {
 					noOfRepeated++;
 				}

@@ -190,6 +190,13 @@ const playingNowEmbed = async (guildId) => {
 const queueEmbed = async (guildId, page) => {
 	const queue = await retrieveData(guildId, 'queue');
 
+	if (!queue) {
+		return errorEmbed(
+			'Error',
+			'There was an error when loading your queue.'
+		);
+	}
+
 	const maxPage = Math.ceil(queue.length / 10);
 
 	if (page > maxPage) {

@@ -34,10 +34,11 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
 
 	connection.on(VoiceConnectionStatus.Disconnected, async (obj) => {
 		console.log('The bot has disconnected.');
+
 		try {
 			connection.destroy();
 		} catch (err) {
-			console.error(err);
+			console.log(err);
 		}
 	});
 
@@ -71,6 +72,12 @@ const connect = async (guildId, memberVoiceChannel) => {
 	if (memberVoiceChannel.id !== connection.joinConfig.channelId) {
 		const player = await createAudioPlayer(guildId, connection);
 		cacheData['player'][guildId] = player;
+
+		try {
+			connection.destroy();
+		} catch (err) {
+			console.log(err);
+		}
 
 		startConnecting(guildId, memberVoiceChannel);
 

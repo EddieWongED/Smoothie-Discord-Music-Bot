@@ -6,17 +6,19 @@ const {
 	loadingEmbed,
 } = require('../../objects/embed.js');
 const { setData, retrieveData } = require('../../utils/changeData.js');
+const { editReply } = require('../../utils/messageHandler.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('clear')
 		.setDescription('Clear the queue.'),
-	async execute(interaction) {
+	async execute(interaction, args) {
 		let embed = loadingEmbed(
 			'Attempting to clear the queue...',
 			'Please be patient...'
 		);
-		await interaction
+
+		const mainMessage = await interaction
 			.reply({ embeds: [embed.embed], files: embed.files })
 			.catch((err) => {
 				console.error(err);
@@ -32,11 +34,11 @@ module.exports = {
 				'You are not in the same voice channel as Smoothie!',
 				'Please join the voice channel before you want to do something!'
 			);
-			await interaction
-				.editReply({ embeds: [embed.embed], files: embed.files })
-				.catch((err) => {
-					console.error(err);
-				});
+			await editReply(
+				args,
+				embed,
+				mainMessage ? mainMessage : interaction
+			);
 
 			return;
 		}
@@ -49,11 +51,11 @@ module.exports = {
 				'There is nothing in the queue...',
 				'Why would you want to clear the queue when there is nothing in the queue?'
 			);
-			await interaction
-				.editReply({ embeds: [embed.embed], files: embed.files })
-				.catch((err) => {
-					console.error(err);
-				});
+			await editReply(
+				args,
+				embed,
+				mainMessage ? mainMessage : interaction
+			);
 
 			return;
 		}
@@ -69,18 +71,10 @@ module.exports = {
 					queueLength - 1
 				} music have been cleared. The music that is currently playing will not be cleared.`
 			);
-			await interaction
-				.editReply({ embeds: [embed.embed], files: embed.files })
-				.catch((err) => {
-					console.error(err);
-				});
 		} else {
 			embed = errorEmbed('Cannot clear the queue...', 'for some reason.');
-			await interaction
-				.editReply({ embeds: [embed.embed], files: embed.files })
-				.catch((err) => {
-					console.error(err);
-				});
 		}
+
+		await editReply(args, embed, mainMessage ? mainMessage : interaction);
 	},
 };

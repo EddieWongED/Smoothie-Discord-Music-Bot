@@ -5,7 +5,56 @@ const guildDataKeys = require('../const/guildDataKeys.js');
 const checkGuildDataExist = async (guildId) => {
 	try {
 		const stat = await fs.stat(`./data/guildData/${guildId}.json`);
+
+		const dataBuffer = await fs.readFile(
+			`./data/guildData/${guildId}.json`
+		);
+		var data;
+
+		try {
+			data = JSON.parse(dataBuffer);
+		} catch (err) {
+			console.log(
+				`Error occurs when parsing /data/guildData/${guildId}.json`
+			);
+			return false;
+		}
+
+		const subDataObject = {};
+		for (guildDataKey of guildDataKeys) {
+			if (!(guildDataKey in data)) {
+				if (guildDataKey == 'queue') {
+					subDataObject['queue'] = [];
+				} else if (guildDataKey == 'guildId') {
+					subDataObject['guildId'] = guildId;
+				} else if (guildDataKey == 'prefix') {
+					subDataObject['prefix'] = '$';
+				} else {
+					subDataObject[guildDataKey] = null;
+				}
+
+				console.log(
+					`Added missing key ${guildDataKey} to /data/guildData/${guildId}.json.`
+				);
+			} else {
+				subDataObject[guildDataKey] = data[guildDataKey];
+			}
+		}
+
+		try {
+			const write = await fs.writeFile(
+				`./data/guildData/${guildId}.json`,
+				JSON.stringify(subDataObject, null, 2)
+			);
+
+			const status = await saveDataToDB(guildId, data);
+		} catch (err) {
+			console.log(err);
+
+			return false;
+		}
 	} catch (err) {
+		console.log(err);
 		try {
 			const subDataObject = {};
 			for (guildDataKey of guildDataKeys) {
@@ -13,6 +62,8 @@ const checkGuildDataExist = async (guildId) => {
 					subDataObject['queue'] = [];
 				} else if (guildDataKey == 'guildId') {
 					subDataObject['guildId'] = guildId;
+				} else if (guildDataKey == 'prefix') {
+					subDataObject['prefix'] = '$';
 				} else {
 					subDataObject[guildDataKey] = null;
 				}
@@ -51,7 +102,7 @@ const setData = async (guildId, key, value) => {
 		console.log(
 			`Error occurs when parsing /data/guildData/${guildId}.json`
 		);
-		return null;
+		return false;
 	}
 
 	if (!(key in data)) {
