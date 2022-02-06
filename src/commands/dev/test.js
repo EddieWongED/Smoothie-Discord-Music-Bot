@@ -10,7 +10,8 @@ const { retrieveData } = require('../../utils/changeData.js');
 const cacheData = require('../../../data/cacheData.js');
 const ytdl = require('ytdl-core');
 const youtubedl = require('youtube-dl-exec');
-const { editReply } = require('../../utils/messageHandler.js');
+const { editReply } = require('../../handlers/messageHandler.js');
+const { stream, video_basic_info } = require('play-dl');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -49,37 +50,5 @@ module.exports = {
 			.catch((err) => {
 				console.error(err);
 			});
-
-		const filter = (interaction) => {
-			return interaction.message.id === mainMessage.id;
-		};
-
-		const collector = mainMessage.channel.createMessageComponentCollector({
-			filter,
-			time: 120000,
-		});
-
-		collector.on('collect', async (obj) => {
-			switch (obj.customId) {
-				case 'testButton':
-					const command = interaction.client.commands.get('queue');
-
-					try {
-						await command.execute(interaction, []);
-					} catch (error) {
-						console.error(error);
-						const embed = errorEmbed(
-							'There was an error while executing this command!',
-							'Something went wrong...'
-						);
-						await editReply(
-							args,
-							embed,
-							mainMessage ? mainMessage : interaction
-						);
-					}
-					break;
-			}
-		});
 	},
 };

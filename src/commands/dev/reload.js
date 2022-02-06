@@ -6,7 +6,7 @@ const {
 	successEmbed,
 	errorEmbed,
 } = require('../../objects/embed.js');
-const { editReply } = require('../../utils/messageHandler.js');
+const { editReply } = require('../../handlers/messageHandler.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()

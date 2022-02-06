@@ -9,7 +9,7 @@ const {
 } = require('../../objects/embed.js');
 const cacheData = require('../../../data/cacheData.js');
 const { retrieveData } = require('../../utils/changeData.js');
-const { editReply } = require('../../utils/messageHandler.js');
+const { editReply } = require('../../handlers/messageHandler.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()

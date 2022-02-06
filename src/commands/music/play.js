@@ -14,7 +14,7 @@ const {
 const cacheData = require('../../../data/cacheData.js');
 const { queuePlaylist } = require('../../utils/queueURL.js');
 const wait = require('util').promisify(setTimeout);
-const { editReply } = require('../../utils/messageHandler.js');
+const { editReply } = require('../../handlers/messageHandler.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()

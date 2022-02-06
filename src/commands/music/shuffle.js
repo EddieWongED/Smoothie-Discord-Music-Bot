@@ -6,7 +6,7 @@ const {
 } = require('../../objects/embed.js');
 const { retrieveData, setData } = require('../../utils/changeData.js');
 const { isSameVoiceChannel } = require('../../utils/isSameVoiceChannel.js');
-const { editReply } = require('../../utils/messageHandler.js');
+const { editReply } = require('../../handlers/messageHandler.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()

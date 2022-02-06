@@ -92,6 +92,8 @@ Remark: Since Heroku filesystem is ephemeral (any changes to the filesystem whil
 
 -   Add alias to commands.
 -   Add swap, pause, resume commands.
+-   Add stat command.
+-   Add spotify support.
 
 ## Bug :lady_beetle:
 

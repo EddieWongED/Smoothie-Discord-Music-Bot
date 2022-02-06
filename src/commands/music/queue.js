@@ -9,7 +9,8 @@ const {
 const { retrieveData, setData } = require('../../utils/changeData.js');
 const { isSameVoiceChannel } = require('../../utils/isSameVoiceChannel.js');
 const wait = require('util').promisify(setTimeout);
-const { editReply } = require('../../utils/messageHandler.js');
+const { editReply } = require('../../handlers/messageHandler.js');
+const client = require('../../index.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -113,6 +114,12 @@ module.exports = {
 			.setStyle('SUCCESS')
 			.setDisabled(Math.ceil(tempQueue.length / 10) === 1);
 
+		const shuffleButton = new MessageButton()
+			.setCustomId('shuffleButton')
+			.setLabel('Shuffle')
+			.setStyle('SECONDARY')
+			.setDisabled(false);
+
 		const row = new MessageActionRow().addComponents(
 			firstPageButton,
 			prevPageButton,
@@ -121,6 +128,8 @@ module.exports = {
 			choosePageButton
 		);
 
+		const row2 = new MessageActionRow().addComponents(shuffleButton);
+
 		var message;
 
 		if (args) {
@@ -128,7 +137,7 @@ module.exports = {
 				.edit({
 					embeds: [embed.embed],
 					files: embed.files,
-					components: [row],
+					components: [row, row2],
 				})
 				.catch((err) => {
 					console.error(err);
@@ -138,7 +147,7 @@ module.exports = {
 				.editReply({
 					embeds: [embed.embed],
 					files: embed.files,
-					components: [row],
+					components: [row, row2],
 				})
 				.catch((err) => {
 					console.error(err);
@@ -270,7 +279,7 @@ module.exports = {
 									await message
 										.edit({
 											embeds: [embed.embed],
-											components: [row],
+											components: [row, row2],
 										})
 										.catch((err) => {
 											console.log(err);
@@ -351,6 +360,19 @@ module.exports = {
 					}
 
 					break;
+				case 'shuffleButton':
+					const command = client.commands.get('shuffle');
+					if (command != null) {
+						try {
+							await command.execute(message, []);
+						} catch (err) {
+							console.error(err);
+						}
+					}
+
+					page = 1;
+
+					break;
 			}
 
 			if (page == 1) {
@@ -377,7 +399,7 @@ module.exports = {
 			}
 			embed = await queueEmbed(interaction.guildId, page);
 			await interaction
-				.update({ embeds: [embed.embed], components: [row] })
+				.update({ embeds: [embed.embed], components: [row, row2] })
 				.catch((err) => {
 					console.log(err);
 				});

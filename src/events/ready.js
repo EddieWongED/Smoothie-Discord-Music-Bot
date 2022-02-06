@@ -19,6 +19,8 @@ module.exports = {
 
 		client.user.setActivity('$play / slash command', { type: 'PLAYING' });
 
+		
+
 		try {
 			const commandDirs = await getFiles('./data/guildData');
 			const filterDirs = commandDirs.filter((file) =>

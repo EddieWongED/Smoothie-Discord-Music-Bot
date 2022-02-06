@@ -32,6 +32,17 @@ module.exports = {
 			}
 			if (splitMessage[0].toLowerCase() === prefix + command[0]) {
 				found = true;
+
+				const status = await setData(
+					message.guildId,
+					'respondChannelId',
+					message.channelId
+				);
+
+				if (!status) {
+					console.log('Failed to update respondChannelId');
+				}
+
 				try {
 					await command[1].execute(message, args);
 				} catch (error) {
