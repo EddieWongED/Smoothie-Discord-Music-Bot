@@ -16,9 +16,34 @@ const { stream, video_basic_info } = require('play-dl');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('test')
-		.setDescription('For Eddie to test his code. Run this if you dare.'),
+		.setDescription('For Eddie to test his code.'),
+	description(prefix) {
+		return `For Eddie to test his code.\n
+				Usage: \`${prefix}test\` or \`/test\``;
+	},
 	async execute(interaction, args) {
-		if (interaction.member.id != process.env.MYUSERID) {
+		const devUserIdList = process.env.DEVUSERIDS;
+		let devUserIds;
+
+		let found = false;
+
+		if (devUserIdList) {
+			devUserIds = devUserIdList.split(' ');
+
+			for (let devUserId of devUserIds) {
+				if (devUserId === interaction.member.id) {
+					found = true;
+
+					break;
+				}
+			}
+		} else {
+			console.log(
+				'WARNING: Unable to find your DEVUSERIDS! If you want to use dev commands, please add DEVUSERIDS=<your_user_id> in .env file.'
+			);
+		}
+
+		if (!found) {
 			const embed = errorEmbed(
 				'You think you are good enough to run this command?',
 				'Idiot.'

@@ -15,8 +15,12 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('description')
 		.setDescription(
-			'Gets the Youtube description of the currently-playing music.'
+			'Get the Youtube description of the currently-playing music.'
 		),
+	description(prefix) {
+		return `Get the Youtube description of the currently-playing music.\n
+				Usage: \`${prefix}description\` or \`/description\``;
+	},
 	async execute(interaction, args) {
 		let embed = loadingEmbed(
 			'Attempting to get description...',

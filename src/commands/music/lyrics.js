@@ -18,8 +18,12 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('lyrics')
 		.setDescription(
-			'Attempts to find the lyrics of the currently-playing song (may takes some time to load).'
+			'Attempt to find the lyrics of the currently-playing song (may takes some time to load).'
 		),
+	description(prefix) {
+		return `Attempt to find the lyrics of the currently-playing song (may takes some time to load).\n
+				Usage: \`${prefix}lyrics\` or \`/lyrics\``;
+	},
 	async execute(interaction, args) {
 		let embed = loadingEmbed(
 			'Attempting to find the lyrics...',

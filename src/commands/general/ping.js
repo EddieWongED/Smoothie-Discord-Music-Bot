@@ -4,7 +4,11 @@ const { neturalEmbed } = require('../../objects/embed.js');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('ping')
-		.setDescription('Replies with Pong!'),
+		.setDescription('Reply with Pong!'),
+	description(prefix) {
+		return `Reply with Pong!\n
+				Usage: \`${prefix}ping\` or \`/ping\``;
+	},
 	async execute(interaction) {
 		let embed = neturalEmbed('Pong!', 'Replied with Pong!');
 		await interaction

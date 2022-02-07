@@ -1,6 +1,6 @@
 # Smoothie - a discord music bot :musical_note:
 
-A discord music bot that uses discord.js v13 to program. For personal use only. Only suitable for a guild with a small group of friends.
+A discord music bot that uses discord.js v13 to program. Only suitable for a guild with a small group of friends.
 
 Give a :heartbeat: and :star: if this bot helps!
 
@@ -16,19 +16,20 @@ Give a :heartbeat: and :star: if this bot helps!
 
 ## Commands :keyboard:
 
-| Command          | Description                                                                                                                                                                                                                     |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| clear            | Clears the queue except the music that is currently playing.                                                                                                                                                                    |
-| join             | Joins your voice channel. If there is something in the queue, the music will be automatically played.                                                                                                                           |
-| leave            | Leaves your voice channel.                                                                                                                                                                                                      |
-| play             | Queues the music with the provided Youtube URL. Can either be a single music or a playlist URL. If `play_now` is `True` and the URL is an music, the music will play immediately. `play_now` has no effect on playlist.         |
-| playloopplaylist | Queues the playlist where the URL is specified on environment variable `LOOPPLAYLISTURL`. The purpose of this command is to avoid copying and pasting the playlist URL where you and your friends save your favourite music on. |
-| queue            | Shows the queue.                                                                                                                                                                                                                |
-| shuffle          | Shuffles the queue.                                                                                                                                                                                                             |
-| skip             | Skips the current music.                                                                                                                                                                                                        |
-| lyrics           | Attempts to get the lyrics of the currently-playing song from [Genius](https://genius.com/) (may takes some time to load).                                                                                                      |
-| description      | Gets the Youtube description of the currently-playing music.                                                                                                                                                                    |
-| prefix           | Change / Show the prefix of your guild (Default: `$`).                                                                                                                                                                          |
+| Command          | Description                                                                                                                                                                                                                    |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| help             | Show all the commands and its description.                                                                                                                                                                                     |
+| clear            | Clear the queue except the music that is currently playing.                                                                                                                                                                    |
+| join             | Join your voice channel. If there is something in the queue, the music will be automatically played.                                                                                                                           |
+| leave            | Leave your voice channel.                                                                                                                                                                                                      |
+| play             | Queue the music with the provided Youtube URL. Can either be a single music or a playlist URL. If `play_now` is `True` and the URL is an music, the music will play immediately. `play_now` has no effect on playlist.         |
+| playloopplaylist | Queue the playlist where the URL is specified on environment variable `LOOPPLAYLISTURL`. The purpose of this command is to avoid copying and pasting the playlist URL where you and your friends save your favourite music on. |
+| queue            | Show the queue.                                                                                                                                                                                                                |
+| shuffle          | Shuffle the queue.                                                                                                                                                                                                             |
+| skip             | Skip the current music.                                                                                                                                                                                                        |
+| lyrics           | Attempt to get the lyrics of the currently-playing song from [Genius](https://genius.com/) (may takes some time to load).                                                                                                      |
+| description      | Get the Youtube description of the currently-playing music.                                                                                                                                                                    |
+| prefix           | Change / Show the prefix of your guild (Default: `$`).                                                                                                                                                                         |
 
 ## How to install :computer:
 
@@ -38,14 +39,14 @@ Give a :heartbeat: and :star: if this bot helps!
 4. In `configs.json` file, change the value of `useMongoDB` to `false` if you not going to use MongoDB. (In Heroku, you need to setup mongoDB in order to permenantly store the data (e.g. queue list, auto rejoin when Heroku restarts). Otherwise the data will be wiped every 24 hours).
 5. Add a `.env` file at the root folder which stores your environment variables' value.
 
-    | Variable          | Description                                                                                                          |
-    | ----------------- | -------------------------------------------------------------------------------------------------------------------- |
-    | `CLIENTID`        | the clientid which can be found on discord develop portal.                                                           |
-    | `TOKEN`           | the bot tocket which can be found on discord develop portal.                                                         |
-    | `MYUSERID`        | Your discord user id.                                                                                                |
-    | `TESTGUILDID`     | the id of your guild.                                                                                                |
-    | `LOOPPLAYLISTURL` | the URL of a playlist which you want to play via /playloopplaylist.                                                  |
-    | `MONGODBURL`      | the URL of MongoDB that links to your database (More detail below). If you not gonna use it, you can leave it blank. |
+    | Variable                                                          | Description                                                                                                                                             |
+    | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `CLIENTID` (required)                                             | The clientid which can be found on discord develop portal.                                                                                              |
+    | `TOKEN` (required)                                                | The bot token which can be found on discord develop portal.                                                                                             |
+    | `DEVUSERIDS`                                                      | The list of user ids that can use dev commands. Separate with space. (e.g.: "158940399584059687 695485693485676567" without the "")                     |
+    | `LOOPPLAYLISTURL`                                                 | The URL of a playlist which you want to play via `/playloopplaylist`.                                                                                   |
+    | `LOOPPLAYLISTGUILDIDS`                                            | The list of guild ids that can use the command `/playloopplaylist`. Separate with space. (e.g.: "158940399584059687 695485693485676567" without the "") |
+    | `MONGODBURL` (required if `useMongoDB` is true in `configs.json`) | The URL of MongoDB that links to your database (More detail below). If you not gonna use it, you can leave it blank.                                    |
 
 6. Run `npm start`. The bot should up in running right now!
 

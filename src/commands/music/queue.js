@@ -15,7 +15,11 @@ const client = require('../../index.js');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('queue')
-		.setDescription("Shows what's next."),
+		.setDescription('Show all the music that is in the queue.'),
+	description(prefix) {
+		return `Show all the music that is in the queue.\n
+				Usage: \`${prefix}queue\` or \`/queue\``;
+	},
 	async execute(interaction, args) {
 		let embed = loadingEmbed(
 			'Attempting to load the queue...',
@@ -130,29 +134,12 @@ module.exports = {
 
 		const row2 = new MessageActionRow().addComponents(shuffleButton);
 
-		var message;
-
-		if (args) {
-			message = await mainMessage
-				.edit({
-					embeds: [embed.embed],
-					files: embed.files,
-					components: [row, row2],
-				})
-				.catch((err) => {
-					console.error(err);
-				});
-		} else {
-			message = await interaction
-				.editReply({
-					embeds: [embed.embed],
-					files: embed.files,
-					components: [row, row2],
-				})
-				.catch((err) => {
-					console.error(err);
-				});
-		}
+		const message = await editReply(
+			args,
+			embed,
+			mainMessage ? mainMessage : interaction,
+			[row, row2]
+		);
 
 		const status = setData(
 			interaction.guildId,

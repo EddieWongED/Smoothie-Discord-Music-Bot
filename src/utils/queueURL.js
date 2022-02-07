@@ -5,6 +5,7 @@ const { createAudioResource } = require('../objects/audioResource.js');
 const cacheData = require('../../data/cacheData.js');
 const { AudioPlayerStatus, getVoiceConnection } = require('@discordjs/voice');
 const { retrieveData, setData } = require('../utils/changeData.js');
+const client = require('../index.js');
 
 const QueueVideoStatus = {
 	SUCCESS: 0,
@@ -124,7 +125,7 @@ const queuePlaylist = async (guildId, url) => {
 			noOfRepeated: noOfRepeated,
 		};
 	} catch (err) {
-		console.error(err);
+		console.error(`${client.guilds.cache.get(guildId).name}: Invalid URL.`);
 		return null;
 	}
 };

@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const configs = require('../configs.json');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
+const { exit } = require('process');
 
 dotenv.config();
 
@@ -13,6 +14,24 @@ getFiles('./src/commands')
 	.then((files) => {
 		const commands = [];
 
+		const clientID = process.env.CLIENTID;
+
+		if (!clientID) {
+			console.log(
+				'Unable to find your CLIENTID! Please check if CLIENTID is in .env file.'
+			);
+			process.exit();
+		}
+
+		const token = process.env.TOKEN;
+
+		if (!token) {
+			console.log(
+				'Unable to find your TOKEN! Please check if TOKEN is in .env file.'
+			);
+			process.exit();
+		}
+
 		const commandDirs = files.filter((file) => file.endsWith('.js'));
 		for (const commandDir of commandDirs) {
 			console.log(commandDir);
@@ -20,9 +39,9 @@ getFiles('./src/commands')
 			commands.push(command.data.toJSON());
 		}
 
-		const rest = new REST({ version: '9' }).setToken(process.env.TOKEN);
+		const rest = new REST({ version: '9' }).setToken(token);
 
-		rest.put(Routes.applicationCommands(process.env.CLIENTID), {
+		rest.put(Routes.applicationCommands(clientID), {
 			body: commands,
 		})
 			.then(() =>
@@ -71,19 +90,28 @@ getFiles('./src/events')
 	})
 	.catch((e) => console.error(e));
 
+const token = process.env.TOKEN;
+
+if (!token) {
+	console.log(
+		'Unable to find your TOKEN! Please check if TOKEN is in .env file.'
+	);
+	process.exit();
+}
+
 // Connect to database
 if (configs.useMongoDB) {
 	connectDB()
 		.then(async (result) => {
 			const success = await importFromDBToLocalJSON();
 			if (result) {
-				client.login(process.env.TOKEN);
+				client.login(token);
 			}
 		})
 		.catch((err) => {
 			console.error(err);
 		});
 } else {
-	client.login(process.env.TOKEN);
+	client.login(token);
 }
 module.exports = client;

@@ -11,6 +11,10 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('leave')
 		.setDescription('Let Smoothie leave your voice channel sadly.'),
+	description(prefix) {
+		return `Let Smoothie leave your voice channel sadly.\n
+				Usage: \`${prefix}leave\` or \`/leave\``;
+	},
 	async execute(interaction, args) {
 		let embed = loadingEmbed(
 			'Attempting to leave your voice channel...',

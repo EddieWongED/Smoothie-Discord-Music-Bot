@@ -17,9 +17,7 @@ module.exports = {
 	async execute(client) {
 		console.log(`Ready! Logged in as ${client.user.tag}`);
 
-		client.user.setActivity('$play / slash command', { type: 'PLAYING' });
-
-		
+		client.user.setActivity('$help / slash command', { type: 'PLAYING' });
 
 		try {
 			const commandDirs = await getFiles('./data/guildData');

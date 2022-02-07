@@ -11,7 +11,13 @@ const { editReply } = require('../../handlers/messageHandler.js');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('clear')
-		.setDescription('Clear the queue.'),
+		.setDescription(
+			'Clear all the music in the queue except the currently-playing one.'
+		),
+	description(prefix) {
+		return `Clear all the music in the queue except the currently-playing one.\n
+				Usage: \`${prefix}clear\` or \`/clear\``;
+	},
 	async execute(interaction, args) {
 		let embed = loadingEmbed(
 			'Attempting to clear the queue...',

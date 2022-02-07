@@ -19,7 +19,7 @@ const { editReply } = require('../../handlers/messageHandler.js');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('play')
-		.setDescription('Plays music with specified Youtube URL.')
+		.setDescription('Play music with the specified Youtube URL.')
 		.addStringOption((option) =>
 			option
 				.setName('url')
@@ -34,6 +34,10 @@ module.exports = {
 				)
 				.setRequired(true)
 		),
+	description(prefix) {
+		return `Play music with the specified Youtube URL \`<url>\`. For \`<play_now>\`, type \`true\` if you want to play the music immediately, else type \`false\`.\n
+				Usage: \`${prefix}lyrics <url> <play_now>\` or \`/lyrics <url> <play_now>\``;
+	},
 	async execute(interaction, args, isPlayLoopPlaylist) {
 		var url = null;
 		var playNow = null;

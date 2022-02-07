@@ -10,6 +10,13 @@ dotenv.config();
 const connectDB = async () => {
 	if (configs.useMongoDB) {
 		try {
+			const mongoDBURL = process.env.MONGODBURL;
+			if (!mongoDBURL) {
+				console.log(
+					'Unable to find your MONGODBURL! Please check if MONGODBURL is in .env file. If you do not plan to use mongoDB, please change the value of useMongoDB in configs.json to false.'
+				);
+				process.exit();
+			}
 			const result = await mongoose.connect(process.env.MONGODBURL, {
 				useNewUrlParser: true,
 				useUnifiedTopology: true,

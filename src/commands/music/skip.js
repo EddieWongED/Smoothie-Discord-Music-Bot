@@ -14,7 +14,11 @@ const { editReply } = require('../../handlers/messageHandler.js');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('skip')
-		.setDescription('Skips the current song because you hate it.'),
+		.setDescription('Skip the currently-playing song.'),
+	description(prefix) {
+		return `Skip the currently-playing song.\n
+				Usage: \`${prefix}skip\` or \`/skip\``;
+	},
 	async execute(interaction, args) {
 		let embed = loadingEmbed(
 			'Attempting to skip the music...',

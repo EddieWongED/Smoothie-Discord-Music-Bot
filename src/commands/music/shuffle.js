@@ -11,7 +11,11 @@ const { editReply } = require('../../handlers/messageHandler.js');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('shuffle')
-		.setDescription('Shuffles the queue.'),
+		.setDescription('Shuffle the queue.'),
+	description(prefix) {
+		return `Shuffle the queue.\n
+				Usage: \`${prefix}shuffle\` or \`/shuffle\``;
+	},
 	async execute(interaction, args) {
 		let embed = loadingEmbed(
 			'Attempting to shuffle...',

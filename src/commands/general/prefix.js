@@ -19,6 +19,12 @@ module.exports = {
 				)
 				.setRequired(false)
 		),
+	description(prefix) {
+		return `Show the prefix.\n
+				Usage: \`${prefix}prefix\` or \`/prefix\`\n
+				Change the prefix to \`<prefix>\`.\n
+				Usage: \`${prefix}prefix <prefix>\` or \`/prefix <prefix>\``;
+	},
 	async execute(interaction, args) {
 		var prefix = null;
 

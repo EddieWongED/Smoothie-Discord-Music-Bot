@@ -10,7 +10,11 @@ const { editReply } = require('../../handlers/messageHandler.js');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('join')
-		.setDescription('Let Smoothie join the voice channel.'),
+		.setDescription('Let Smoothie your the voice channel.'),
+	description(prefix) {
+		return `Let Smoothie join your voice channel.\n
+				Usage: \`${prefix}join\` or \`/join\``;
+	},
 	async execute(interaction, args) {
 		let embed = loadingEmbed(
 			'Attempting to join your voice channel...',
