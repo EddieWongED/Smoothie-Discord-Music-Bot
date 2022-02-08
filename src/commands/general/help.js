@@ -43,12 +43,13 @@ module.exports = {
 		const cateDict = {};
 
 		for (let commandDir of commandDirs) {
+			commandDir = commandDir.replaceAll('\\', '/');
 			const cate = commandDir.substring(
 				commandDir.indexOf('commands') + 9,
-				commandDir.lastIndexOf('\\')
+				commandDir.lastIndexOf('/')
 			);
 			const command = commandDir.substring(
-				commandDir.lastIndexOf('\\') + 1,
+				commandDir.lastIndexOf('/') + 1,
 				commandDir.lastIndexOf('.js')
 			);
 			if (!(cate in cateDict)) {
