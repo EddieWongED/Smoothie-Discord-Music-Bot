@@ -3,8 +3,7 @@ const { retrieveData, setData } = require('../utils/changeData.js');
 const client = require('../index.js');
 const { neturalEmbed, successEmbed } = require('../objects/embed.js');
 const cacheData = require('../../data/cacheData.js');
-const { createAudioResource } = require('../objects/audioResource.js');
-const { createAudioPlayer } = require('../objects/audioPlayer.js');
+const { playFirstMusic } = require('../objects/audioPlayer.js');
 const wait = require('util').promisify(setTimeout);
 
 module.exports = {
@@ -44,11 +43,11 @@ module.exports = {
 							const channel =
 								client.channels.cache.get(channelId);
 							if (channel) {
-								let embed = neturalEmbed(
-									'No one want to listen to Smoothie anymore...',
-									'Therefore, she stop singing. She will resume if someone joins the voice channel.'
-								);
 								if (!newState.member.user.bot) {
+									let embed = neturalEmbed(
+										'No one want to listen to Smoothie anymore...',
+										'Therefore, she stop singing. She will resume if someone joins the voice channel.'
+									);
 									await channel
 										.send({
 											embeds: [embed.embed],
@@ -76,64 +75,42 @@ module.exports = {
 								const channel =
 									client.channels.cache.get(channelId);
 								if (channel) {
-									let embed = successEmbed(
-										'Welcome back!',
-										'Smoothie will continue to sing.'
-									);
-									await channel
-										.send({
-											embeds: [embed.embed],
-											files: embed.files,
-										})
-										.catch((err) => {
-											console.error(err);
-										});
+									if (!newState.member.user.bot) {
+										let embed = successEmbed(
+											'Welcome back!',
+											'Smoothie will continue to sing.'
+										);
+										await channel
+											.send({
+												embeds: [embed.embed],
+												files: embed.files,
+											})
+											.catch((err) => {
+												console.error(err);
+											});
+									}
 								}
 							}
 						} else {
-							const queue = await retrieveData(guildId, 'queue');
-
-							if (queue.length >= 1) {
-								const resource = await createAudioResource(
-									guildId,
-									queue[0]['url'],
-									queue[0]['title']
+							const connection = getVoiceConnection(guildId);
+							if (connection) {
+								const playSuccess = await playFirstMusic(
+									guildId
 								);
-								if (resource != null) {
-									const connection =
-										getVoiceConnection(guildId);
-									if (connection) {
-										const newPlayer =
-											await createAudioPlayer(
-												guildId,
-												connection
-											);
-										connection.subscribe(newPlayer);
-										newPlayer.play(resource);
-									}
+								if (!playSuccess) {
+									console.log(
+										'Unable to play the first music.'
+									);
 								}
 							}
 						}
 					}
 				} else {
-					const queue = await retrieveData(guildId, 'queue');
-
-					if (queue.length >= 1) {
-						const resource = await createAudioResource(
-							guildId,
-							queue[0]['url'],
-							queue[0]['title']
-						);
-						if (resource != null) {
-							const connection = getVoiceConnection(guildId);
-							if (connection) {
-								const newPlayer = await createAudioPlayer(
-									guildId,
-									connection
-								);
-								connection.subscribe(newPlayer);
-								newPlayer.play(resource);
-							}
+					const connection = getVoiceConnection(guildId);
+					if (connection) {
+						const playSuccess = await playFirstMusic(guildId);
+						if (!playSuccess) {
+							console.log('Unable to play the first music.');
 						}
 					}
 				}

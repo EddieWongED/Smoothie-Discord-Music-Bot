@@ -21,6 +21,23 @@ const getNextAudioResource = async (guildId) => {
 		const resource = await createAudioResource(guildId, url, title);
 		return resource;
 	}
+
+	return null;
+};
+
+const getFirstAudioResource = async (guildId) => {
+	const queue = await retrieveData(guildId, 'queue');
+
+	if (queue.length != 0) {
+		const url = queue[0]['url'];
+		const title = queue[0]['title'];
+
+		const resource = await createAudioResource(guildId, url, title);
+
+		return resource;
+	}
+
+	return null;
 };
 
 const createAudioResource = async (guildId, url, title) => {
@@ -38,4 +55,8 @@ const createAudioResource = async (guildId, url, title) => {
 	}
 };
 
-module.exports = { getNextAudioResource, createAudioResource };
+module.exports = {
+	getNextAudioResource,
+	getFirstAudioResource,
+	createAudioResource,
+};

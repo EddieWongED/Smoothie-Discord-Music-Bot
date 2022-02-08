@@ -22,6 +22,9 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
 		adapterCreator: memberVoiceChannel.guild.voiceAdapterCreator,
 	});
 
+	const player = cacheData['player'][guildId];
+	connection.subscribe(player);
+
 	const success = await setData(
 		guildId,
 		'voiceChannelId',
@@ -44,7 +47,7 @@ const startConnecting = async (guildId, memberVoiceChannel) => {
 
 	connection.on(VoiceConnectionStatus.Destroyed, async (obj) => {
 		console.log('The connection has been destroyed.');
-		cacheData['player'][guildId] = null;
+
 		const success = await setData(guildId, 'voiceChannelId', null);
 
 		if (!success) {
@@ -61,25 +64,22 @@ const connect = async (guildId, memberVoiceChannel) => {
 	var connection = getVoiceConnection(guildId);
 
 	if (connection === undefined) {
-		const player = await createAudioPlayer(guildId, connection);
+		const player = await createAudioPlayer(guildId);
 		cacheData['player'][guildId] = player;
 
-		startConnecting(guildId, memberVoiceChannel);
+		await startConnecting(guildId, memberVoiceChannel);
 
 		return ConnectionStatus.SUCCESS;
 	}
 
 	if (memberVoiceChannel.id !== connection.joinConfig.channelId) {
-		const player = await createAudioPlayer(guildId, connection);
-		cacheData['player'][guildId] = player;
-
 		try {
 			connection.destroy();
 		} catch (err) {
 			console.log(err);
 		}
 
-		startConnecting(guildId, memberVoiceChannel);
+		await startConnecting(guildId, memberVoiceChannel);
 
 		return ConnectionStatus.SUCCESS_JOINED_FROM_OTHER_CHANNEL;
 	}

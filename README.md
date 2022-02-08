@@ -1,6 +1,6 @@
 # Smoothie - a discord music bot :musical_note:
 
-A discord music bot that uses discord.js v13 to program. Only suitable for a guild with a small group of friends.
+A discord music bot that uses discord.js v13 to program. Support both Spotify and Youtube. Only suitable for a guild with a small group of friends.
 
 Give a :heartbeat: and :star: if this bot helps!
 
@@ -13,23 +13,24 @@ Give a :heartbeat: and :star: if this bot helps!
 -   Auto rejoin the voice channel when there is a server update / server crashes (Heroku will restart the server every 24 hours).
 -   Auto pause and unpause when there is no one in the voice channel / someone joins the voice channel.
 -   Support both slash command and prefix command! (default: `$`).
+-   Support both Spotify and Youtube!
 
 ## Commands :keyboard:
 
-| Command          | Description                                                                                                                                                                                                                    |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| help             | Show all the commands and its description.                                                                                                                                                                                     |
-| clear            | Clear the queue except the music that is currently playing.                                                                                                                                                                    |
-| join             | Join your voice channel. If there is something in the queue, the music will be automatically played.                                                                                                                           |
-| leave            | Leave your voice channel.                                                                                                                                                                                                      |
-| play             | Queue the music with the provided Youtube URL. Can either be a single music or a playlist URL. If `play_now` is `True` and the URL is an music, the music will play immediately. `play_now` has no effect on playlist.         |
-| playloopplaylist | Queue the playlist where the URL is specified on environment variable `LOOPPLAYLISTURL`. The purpose of this command is to avoid copying and pasting the playlist URL where you and your friends save your favourite music on. |
-| queue            | Show the queue.                                                                                                                                                                                                                |
-| shuffle          | Shuffle the queue.                                                                                                                                                                                                             |
-| skip             | Skip the current music.                                                                                                                                                                                                        |
-| lyrics           | Attempt to get the lyrics of the currently-playing song from [Genius](https://genius.com/) (may takes some time to load).                                                                                                      |
-| description      | Get the Youtube description of the currently-playing music.                                                                                                                                                                    |
-| prefix           | Change / Show the prefix of your guild (Default: `$`).                                                                                                                                                                         |
+| Command          | Description                                                                                                                                                                                                                      |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| help             | Show all the commands and its description.                                                                                                                                                                                       |
+| clear            | Clear the queue except the music that is currently playing.                                                                                                                                                                      |
+| join             | Join your voice channel. If there is something in the queue, the music will be automatically played.                                                                                                                             |
+| leave            | Leave your voice channel.                                                                                                                                                                                                        |
+| play             | Queue the music with the provided Youtube / Spotify URL. Can either be a single music or a playlist URL. If `play_now` is `True` and the URL is an music, the music will play immediately. `play_now` has no effect on playlist. |
+| playloopplaylist | Queue the playlist where the URL is specified on environment variable `LOOPPLAYLISTURL`. The purpose of this command is to avoid copying and pasting the playlist URL where you and your friends save your favourite music on.   |
+| queue            | Show the queue.                                                                                                                                                                                                                  |
+| shuffle          | Shuffle the queue.                                                                                                                                                                                                               |
+| skip             | Skip the current music.                                                                                                                                                                                                          |
+| lyrics           | Attempt to get the lyrics of the currently-playing song from [Genius](https://genius.com/) (may takes some time to load).                                                                                                        |
+| description      | Get the Youtube description of the currently-playing music.                                                                                                                                                                      |
+| prefix           | Change / Show the prefix of your guild (Default: `$`).                                                                                                                                                                           |
 
 ## How to install :computer:
 

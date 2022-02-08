@@ -54,7 +54,7 @@ module.exports = {
 
 			if (!loopPlaylistURL) {
 				console.log(
-					'WARNING: Unable to find your LOOPPLAYLISTURL! If you want to use /playloopplaylist in your guild, please add LOOPPLAYLISTURL=<youtube_playlist_url> in .env file.'
+					'WARNING: Unable to find your LOOPPLAYLISTURL! If you want to use /playloopplaylist in your guild, please add LOOPPLAYLISTURL=<youtube/spotify_playlist_url> in .env file.'
 				);
 			}
 

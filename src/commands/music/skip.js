@@ -1,13 +1,11 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { getVoiceConnection } = require('@discordjs/voice');
 const { isSameVoiceChannel } = require('../../utils/isSameVoiceChannel.js');
-const { createAudioPlayer } = require('../../objects/audioPlayer.js');
-const { getNextAudioResource } = require('../../objects/audioResource.js');
 const {
 	loadingEmbed,
 	successEmbed,
 	errorEmbed,
 } = require('../../objects/embed.js');
+const { playNextMusic } = require('../../objects/audioPlayer.js');
 const { retrieveData } = require('../../utils/changeData.js');
 const { editReply } = require('../../handlers/messageHandler.js');
 
@@ -53,24 +51,20 @@ module.exports = {
 		const queue = await retrieveData(interaction.guildId, 'queue');
 
 		if (queue.length != 0) {
-			const resource = await getNextAudioResource(interaction.guildId);
-
-			if (resource != null) {
-				const connection = getVoiceConnection(interaction.guildId);
-				if (connection) {
-					const newPlayer = await createAudioPlayer(
-						interaction.guildId,
-						connection
-					);
-					connection.subscribe(newPlayer);
-					newPlayer.play(resource);
-				}
-			}
-
 			embed = successEmbed(
 				'Successfully skipped!',
 				"Seems like you don't like the previous song..."
 			);
+
+			const success = playNextMusic(interaction.guildId);
+
+			if (!success) {
+				embed = errorEmbed(
+					'Unable to play next music',
+					'For some reason...'
+				);
+			}
+
 			await editReply(
 				args,
 				embed,

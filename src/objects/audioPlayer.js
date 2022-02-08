@@ -1,21 +1,19 @@
 const voice = require('@discordjs/voice');
 const { MessageActionRow, MessageButton } = require('discord.js');
 const { isSameVoiceChannel } = require('../utils/isSameVoiceChannel.js');
-const { getNextAudioResource } = require('./audioResource.js');
+const {
+	getNextAudioResource,
+	getFirstAudioResource,
+} = require('./audioResource.js');
 const ytdl = require('ytdl-core');
 const cacheData = require('../../data/cacheData.js');
 const { retrieveData, setData } = require('../utils/changeData.js');
 const client = require('../index.js');
-const {
-	playingNowEmbed,
-	errorEmbed,
-	neturalEmbed,
-	queueEmbed,
-} = require('../objects/embed.js');
+const { playingNowEmbed, errorEmbed } = require('../objects/embed.js');
 const wait = require('util').promisify(setTimeout);
 const { userMention } = require('@discordjs/builders');
 
-const createAudioPlayer = async (guildId, connection) => {
+const createAudioPlayer = async (guildId) => {
 	const player = voice.createAudioPlayer({
 		behaviors: {
 			noSubscriber: voice.NoSubscriberBehavior.Pause,
@@ -27,10 +25,9 @@ const createAudioPlayer = async (guildId, connection) => {
 		console.log(
 			`${client.guilds.cache.get(guildId).name}: "${
 				obj.resource.metadata.title
-			}" is playing in voice channel "${
-				client.channels.cache.get(connection.joinConfig.channelId).name
-			}".`
+			}" is playing in voice channel.`
 		);
+
 		const channelId = await retrieveData(guildId, 'respondChannelId');
 		if (channelId) {
 			const channel = client.channels.cache.get(channelId);
@@ -194,38 +191,14 @@ const createAudioPlayer = async (guildId, connection) => {
 	});
 
 	player.on(voice.AudioPlayerStatus.Idle, async (audio) => {
-		const resource = await getNextAudioResource(guildId);
+		const success = await playNextMusic(guildId);
 
-		if (resource) {
-			const newPlayer = await createAudioPlayer(guildId, connection);
-			connection.subscribe(newPlayer);
-			newPlayer.play(resource);
-		} else {
-			console.log('Unable to find the resource.');
+		if (!success) {
+			console.log('Unable to play next music.');
 		}
 	});
 
 	player.on('error', async (error) => {
-		if (error.code === 410) {
-			const channelId = await retrieveData(guildId, 'respondChannelId');
-			if (channelId) {
-				const channel = client.channels.cache.get(channelId);
-				if (channel) {
-					connection.destroy();
-					let embed = errorEmbed(
-						'Error 410!',
-						'An error occurred! The music has stopped.'
-					);
-					await channel
-						.send({ embeds: [embed.embed], files: embed.files })
-						.catch((err) => {
-							console.error(err);
-						});
-				}
-			}
-			return;
-		}
-
 		console.error(
 			`Error: ${error.resource.metadata.title} ${error} ${error.code}`
 		);
@@ -242,4 +215,45 @@ const createAudioPlayer = async (guildId, connection) => {
 	return player;
 };
 
-module.exports = { createAudioPlayer };
+const playFirstMusic = async (guildId) => {
+	const player = cacheData['player'][guildId];
+	const queue = await retrieveData(guildId, 'queue');
+
+	if (player && queue) {
+		if (queue.length >= 1) {
+			const resource = await getFirstAudioResource(guildId);
+			if (resource != null) {
+				const connection = voice.getVoiceConnection(guildId);
+				if (connection) {
+					player.play(resource);
+
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+};
+
+const playNextMusic = async (guildId) => {
+	const player = cacheData['player'][guildId];
+	const queue = await retrieveData(guildId, 'queue');
+
+	if (player && queue) {
+		if (queue.length >= 1) {
+			const resource = await getNextAudioResource(guildId);
+			if (resource != null) {
+				const connection = voice.getVoiceConnection(guildId);
+				if (connection) {
+					player.play(resource);
+
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+};
+module.exports = { createAudioPlayer, playFirstMusic, playNextMusic };

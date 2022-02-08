@@ -11,7 +11,9 @@ const cacheData = require('../../../data/cacheData.js');
 const ytdl = require('ytdl-core');
 const youtubedl = require('youtube-dl-exec');
 const { editReply } = require('../../handlers/messageHandler.js');
-const { stream, video_basic_info } = require('play-dl');
+const { stream, video_basic_info, spotify } = require('play-dl');
+const { getData, getPreview, getTracks } = require('spotify-url-info');
+const { validURL, queuePlaylist } = require('../../handlers/urlHandler.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -75,5 +77,14 @@ module.exports = {
 			.catch((err) => {
 				console.error(err);
 			});
+
+		const status = await getTracks(args[0]);
+		console.log(status);
+
+		// let sp_data = await getTracks(args[0]);
+
+		// for (let data of sp_data) {
+		// 	console.log(`${data.name} ${data.artists[0]['name']}`);
+		// }
 	},
 };
