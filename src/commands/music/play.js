@@ -387,10 +387,11 @@ module.exports = {
 		const player = cacheData['player'][interaction.guildId];
 
 		if (
-			(player.state.status != AudioPlayerStatus.Playing || playNow) &&
-			!errorStop &&
-			valid != URLType.YOUTUBEPLAYLIST &&
-			valid != URLType.SPOTIFYPLAYLIST
+			player.state.status != AudioPlayerStatus.Playing ||
+			(playNow &&
+				!errorStop &&
+				valid != URLType.YOUTUBEPLAYLIST &&
+				valid != URLType.SPOTIFYPLAYLIST)
 		) {
 			const playSuccess = await playFirstMusic(interaction.guildId);
 			if (!playSuccess) {
