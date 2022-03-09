@@ -6,6 +6,9 @@ const {
 	errorEmbed,
 } = require('../objects/embed.js');
 const { connect, ConnectionStatus } = require('../objects/connection.js');
+const { bold } = require('@discordjs/builders');
+const fs = require('fs');
+const wait = require('util').promisify(setTimeout);
 
 module.exports = {
 	name: 'ready',
@@ -14,6 +17,17 @@ module.exports = {
 		console.log(`Ready! Logged in as ${client.user.tag}`);
 
 		client.user.setActivity('$help / slash command', { type: 'PLAYING' });
+
+		var patches = '';
+		var update = '';
+		try {
+			patches = fs.readFileSync('./text/patches.txt', 'utf8').toString();
+			update = fs
+				.readFileSync('./text/main_update.txt', 'utf8')
+				.toString();
+		} catch (err) {
+			console.error(err);
+		}
 
 		try {
 			const commandDirs = await getFiles('./data/guildData');
@@ -41,10 +55,14 @@ module.exports = {
 							if (channel) {
 								let embed = neturalEmbed(
 									'Smoothie has restarted...',
-									'Since there was an updated / server regular restart (every 24 hours) / server crashes, Smoothie has restarted. Smoothie will now attempt to rejoin your voice channel again...'
+									`Since there was an updated / server regular restart / server crashes, Smoothie has restarted.\nSmoothie will now attempt to rejoin your voice channel again...\n${bold(
+										'Update'
+									)}:\n${update}\n${bold(
+										'Patches'
+									)}:\n${patches}`
 								);
 
-								await channel
+								const msg = await channel
 									.send({
 										embeds: [embed.embed],
 										files: embed.files,
@@ -61,11 +79,15 @@ module.exports = {
 								switch (status) {
 									case ConnectionStatus.SUCCESS:
 										embed = successEmbed(
-											'Smoothie rejoined the voice channel.',
-											'Please welcome her again!'
+											'Smoothie has restarted...',
+											`Since there was an updated / server regular restart / server crashes, Smoothie has restarted.\nSmoothie has successfully rejoined the server!\n${bold(
+												'Update'
+											)}:\n${update}\n${bold(
+												'Patches'
+											)}:\n${patches}`
 										);
-										await channel
-											.send({
+										await msg
+											.edit({
 												embeds: [embed.embed],
 												files: embed.files,
 											})
@@ -76,11 +98,15 @@ module.exports = {
 										break;
 									default:
 										embed = errorEmbed(
-											'Failed to rejoin the voice channel!',
-											'Please try to manually let she to join your voice channel.'
+											'Smoothie has restarted...',
+											`Since there was an updated / server regular restart / server crashes, Smoothie has restarted.\nSmoothie failed to rejoin the server!\n${bold(
+												'Update'
+											)}:\n${update}\n${bold(
+												'Patches'
+											)}:\n${patches}`
 										);
-										await channel
-											.send({
+										await msg
+											.edit({
 												embeds: [embed.embed],
 												files: embed.files,
 											})
@@ -93,6 +119,8 @@ module.exports = {
 						}
 					}
 				}
+
+				await wait(1000);
 			}
 		} catch (err) {
 			console.error(err);

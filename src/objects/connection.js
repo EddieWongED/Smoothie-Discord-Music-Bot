@@ -6,6 +6,7 @@ const {
 const { createAudioPlayer } = require('./audioPlayer.js');
 const cacheData = require('../../data/cacheData.js');
 const { setData } = require('../utils/changeData.js');
+const wait = require('util').promisify(setTimeout);
 
 const ConnectionStatus = {
 	SUCCESS: 0,
@@ -66,6 +67,8 @@ const connect = async (guildId, memberVoiceChannel) => {
 	if (connection === undefined) {
 		const player = await createAudioPlayer(guildId);
 		cacheData['player'][guildId] = player;
+
+		await wait(2000);
 
 		await startConnecting(guildId, memberVoiceChannel);
 

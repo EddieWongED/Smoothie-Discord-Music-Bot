@@ -1,6 +1,7 @@
 const voice = require('@discordjs/voice');
 const { stream } = require('play-dl');
 const { retrieveData, setData } = require('../utils/changeData.js');
+const client = require('../index.js');
 
 const getNextAudioResource = async (guildId) => {
 	const queue = await retrieveData(guildId, 'queue');
@@ -51,6 +52,11 @@ const createAudioResource = async (guildId, url, title) => {
 			},
 		}));
 	} catch (err) {
+		console.error(
+			`${
+				client.guilds.cache.get(guildId).name
+			}: Unable to create current audio resource. Next audio resource will be played.`
+		);
 		return getNextAudioResource(guildId);
 	}
 };

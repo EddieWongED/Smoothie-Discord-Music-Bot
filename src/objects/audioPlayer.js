@@ -16,10 +16,13 @@ const { userMention } = require('@discordjs/builders');
 const createAudioPlayer = async (guildId) => {
 	const player = voice.createAudioPlayer({
 		behaviors: {
-			noSubscriber: voice.NoSubscriberBehavior.Pause,
-			maxMissedFrames: 50,
+			noSubscriber: voice.NoSubscriberBehavior.Idle,
 		},
 	});
+
+	console.log(
+		`${client.guilds.cache.get(guildId).name}: Audio player is created.`
+	);
 
 	player.on(voice.AudioPlayerStatus.Playing, async (obj) => {
 		console.log(
@@ -160,7 +163,7 @@ const createAudioPlayer = async (guildId) => {
 							'Hey!',
 							`${userMention(
 								interaction.member.id
-							)}, you are not in the same channel as Smoothie! Join the voice channel before clicking the 'Next Song' button!`
+							)}, you are not in the same channel as Smoothie! Join the voice channel before clicking the button!`
 						);
 						const errorMessage = await interaction.channel
 							.send({
@@ -190,11 +193,13 @@ const createAudioPlayer = async (guildId) => {
 		}
 	});
 
-	player.on(voice.AudioPlayerStatus.Idle, async (audio) => {
-		const success = await playNextMusic(guildId);
+	player.on(voice.AudioPlayerStatus.Idle, async (oldState, newState) => {
+		if (oldState.status == voice.AudioPlayerStatus.Playing) {
+			const success = await playNextMusic(guildId);
 
-		if (!success) {
-			console.log('Unable to play next music.');
+			if (!success) {
+				console.log('Unable to play next music.');
+			}
 		}
 	});
 
@@ -226,9 +231,10 @@ const playFirstMusic = async (guildId) => {
 				const connection = voice.getVoiceConnection(guildId);
 				if (connection) {
 					player.play(resource);
-
 					return true;
 				}
+			} else {
+				console.log('Audio resource not found.');
 			}
 		}
 	}

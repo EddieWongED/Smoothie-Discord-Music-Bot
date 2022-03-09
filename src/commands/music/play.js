@@ -87,12 +87,24 @@ module.exports = {
 					prefix = '$';
 				}
 
-				let embed = errorEmbed(
-					'Not enough / Too much arguments!',
-					'For `play` command, you must specify the Youtube / Spotify URL first, and then specify if you want to play the music immediately or not. Type `true` if you want, `false` otherwise.\nThe format should be `' +
-						prefix +
-						'play <url> <play_now>`'
-				);
+				let embed = errorEmbed('Error!', 'Unknown Error.');
+
+				if (args.length > 2) {
+					embed = errorEmbed(
+						'Too much arguments!',
+						'For `play` command, you must specify the Youtube / Spotify URL first, and then specify if you want to play the music immediately or not. Type `true` if you want, `false` otherwise.\nThe format should be `' +
+							prefix +
+							'play <url> <play_now>`'
+					);
+				} else {
+					embed = errorEmbed(
+						'Not enough arguments!',
+						'For `play` command, you must specify the Youtube / Spotify URL first, and then specify if you want to play the music immediately or not. Type `true` if you want, `false` otherwise.\nThe format should be `' +
+							prefix +
+							'play <url> <play_now>`'
+					);
+				}
+
 				await interaction
 					.reply({ embeds: [embed.embed], files: embed.files })
 					.catch((err) => {

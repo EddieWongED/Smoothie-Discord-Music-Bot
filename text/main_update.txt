@@ -1,0 +1,3 @@
+- Add `help` command.
+- Add `Shuffle` button in queue message.
+- Add text-line command (default prefix: `$`).
