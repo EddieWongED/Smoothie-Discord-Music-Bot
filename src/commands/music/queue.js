@@ -385,11 +385,15 @@ module.exports = {
 				choosePageButton.setDisabled(false);
 			}
 			embed = await queueEmbed(interaction.guildId, page);
-			await interaction
-				.update({ embeds: [embed.embed], components: [row, row2] })
+			await message
+				.edit({ embeds: [embed.embed], components: [row, row2] })
 				.catch((err) => {
 					console.log(err);
 				});
+
+			await interaction.deferUpdate().catch((err) => {
+				console.log(err);
+			});
 		});
 	},
 };
