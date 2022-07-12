@@ -1,2 +1,1 @@
-- Fix sometimes the playing now message will pop twice when playing the first song.
 - Fix some typos.
