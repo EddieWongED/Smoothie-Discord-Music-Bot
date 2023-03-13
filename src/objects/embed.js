@@ -1,5 +1,5 @@
 const ytdl = require('ytdl-core');
-const { MessageAttachment, MessageEmbed } = require('discord.js');
+const { AttachmentBuilder, EmbedBuilder } = require('discord.js');
 const { retrieveData } = require('../utils/changeData.js');
 const { inlineCode } = require('@discordjs/builders');
 const { getFiles } = require('../utils/getFiles.js');
@@ -13,11 +13,11 @@ const successEmbed = (title, des) => {
 		des = des.substring(0, 4093) + '...';
 	}
 
-	const xxxhdpiIcon = new MessageAttachment(
+	const xxxhdpiIcon = new AttachmentBuilder(
 		'./icon/mipmap-xxxhdpi/smoothie.png'
 	);
-	const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
-	const embed = new MessageEmbed()
+	const hdpiIcon = new AttachmentBuilder('./icon/mipmap-hdpi/smoothie.png');
+	const embed = new EmbedBuilder()
 		.setColor('#63E68C')
 		.setTitle(`:white_check_mark: ${title}`)
 		.setDescription(des)
@@ -39,11 +39,11 @@ const loadingEmbed = (title, des) => {
 		des = des.substring(0, 4093) + '...';
 	}
 
-	const xxxhdpiIcon = new MessageAttachment(
+	const xxxhdpiIcon = new AttachmentBuilder(
 		'./icon/mipmap-xxxhdpi/smoothie.png'
 	);
-	const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
-	const embed = new MessageEmbed()
+	const hdpiIcon = new AttachmentBuilder('./icon/mipmap-hdpi/smoothie.png');
+	const embed = new EmbedBuilder()
 		.setColor('#FAA81A')
 		.setTitle(`:hourglass: ${title}`)
 		.setDescription(des)
@@ -65,11 +65,11 @@ const errorEmbed = (title, des) => {
 		des = des.substring(0, 4093) + '...';
 	}
 
-	const xxxhdpiIcon = new MessageAttachment(
+	const xxxhdpiIcon = new AttachmentBuilder(
 		'./icon/mipmap-xxxhdpi/smoothie.png'
 	);
-	const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
-	const embed = new MessageEmbed()
+	const hdpiIcon = new AttachmentBuilder('./icon/mipmap-hdpi/smoothie.png');
+	const embed = new EmbedBuilder()
 		.setColor('#DA5849')
 		.setTitle(`:no_entry: ${title}`)
 		.setDescription(des)
@@ -91,11 +91,11 @@ const neturalEmbed = (title, des) => {
 		des = des.substring(0, 4093) + '...';
 	}
 
-	const xxxhdpiIcon = new MessageAttachment(
+	const xxxhdpiIcon = new AttachmentBuilder(
 		'./icon/mipmap-xxxhdpi/smoothie.png'
 	);
-	const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
-	const embed = new MessageEmbed()
+	const hdpiIcon = new AttachmentBuilder('./icon/mipmap-hdpi/smoothie.png');
+	const embed = new EmbedBuilder()
 		.setColor('#7C5295')
 		.setTitle(title)
 		.setDescription(des)
@@ -150,11 +150,11 @@ const playingNowEmbed = async (guildId) => {
 			durationString = `${hour}:${min}:${sec}`;
 		}
 
-		const hdpiIcon = new MessageAttachment(
+		const hdpiIcon = new AttachmentBuilder(
 			'./icon/mipmap-hdpi/smoothie.png'
 		);
 
-		const embed = new MessageEmbed()
+		const embed = new EmbedBuilder()
 			.setColor('#12E9E9')
 			.setTitle('Playing Now')
 			.setThumbnail(thumbnailURL)
@@ -171,7 +171,7 @@ const playingNowEmbed = async (guildId) => {
 			});
 
 		if (defaultThumbnail) {
-			const xxxhdpiIcon = new MessageAttachment(
+			const xxxhdpiIcon = new AttachmentBuilder(
 				'./icon/mipmap-xxxhdpi/smoothie.png'
 			);
 
@@ -229,9 +229,9 @@ const queueEmbed = async (guildId, page) => {
 		des = des.substring(0, 4093) + '...';
 	}
 
-	const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
+	const hdpiIcon = new AttachmentBuilder('./icon/mipmap-hdpi/smoothie.png');
 
-	const embed = new MessageEmbed()
+	const embed = new EmbedBuilder()
 		.setColor('#5865F2')
 		.setTitle(`Queue`)
 		.setDescription(des)
@@ -255,11 +255,11 @@ const lyricsEmbed = (title, des) => {
 		des = des.substring(0, 4093) + '...';
 	}
 
-	const xxxhdpiIcon = new MessageAttachment(
+	const xxxhdpiIcon = new AttachmentBuilder(
 		'./icon/mipmap-xxxhdpi/smoothie.png'
 	);
-	const hdpiIcon = new MessageAttachment('./icon/mipmap-hdpi/smoothie.png');
-	const embed = new MessageEmbed()
+	const hdpiIcon = new AttachmentBuilder('./icon/mipmap-hdpi/smoothie.png');
+	const embed = new EmbedBuilder()
 		.setColor('#FFFFFF')
 		.setTitle(title)
 		.setDescription(des)
@@ -280,14 +280,14 @@ const helpMainEmbed = async () => {
 		const files = await getFiles('./src/commands');
 		const commandDirs = files.filter((file) => file.endsWith('.js'));
 
-		const xxxhdpiIcon = new MessageAttachment(
+		const xxxhdpiIcon = new AttachmentBuilder(
 			'./icon/mipmap-xxxhdpi/smoothie.png'
 		);
-		const hdpiIcon = new MessageAttachment(
+		const hdpiIcon = new AttachmentBuilder(
 			'./icon/mipmap-hdpi/smoothie.png'
 		);
 
-		let embed = new MessageEmbed()
+		let embed = new EmbedBuilder()
 			.setColor('#7289DA')
 			.setTitle('Help')
 			.setDescription(
@@ -349,10 +349,10 @@ const helpCateEmbed = async (targetCate) => {
 		const files = await getFiles('./src/commands');
 		const commandDirs = files.filter((file) => file.endsWith('.js'));
 
-		const xxxhdpiIcon = new MessageAttachment(
+		const xxxhdpiIcon = new AttachmentBuilder(
 			'./icon/mipmap-xxxhdpi/smoothie.png'
 		);
-		const hdpiIcon = new MessageAttachment(
+		const hdpiIcon = new AttachmentBuilder(
 			'./icon/mipmap-hdpi/smoothie.png'
 		);
 
@@ -383,7 +383,7 @@ const helpCateEmbed = async (targetCate) => {
 				des = `${des}\`${command}\`\n`;
 			}
 
-			const embed = new MessageEmbed()
+			const embed = new EmbedBuilder()
 				.setColor('#7289DA')
 				.setTitle(targetCate)
 				.setDescription(des)
@@ -415,10 +415,10 @@ const helpCommandEmbed = async (guildId, command) => {
 		const files = await getFiles('./src/commands');
 		const commandDirs = files.filter((file) => file.endsWith('.js'));
 
-		const xxxhdpiIcon = new MessageAttachment(
+		const xxxhdpiIcon = new AttachmentBuilder(
 			'./icon/mipmap-xxxhdpi/smoothie.png'
 		);
-		const hdpiIcon = new MessageAttachment(
+		const hdpiIcon = new AttachmentBuilder(
 			'./icon/mipmap-hdpi/smoothie.png'
 		);
 
@@ -442,7 +442,7 @@ const helpCommandEmbed = async (guildId, command) => {
 					des = 'There is no description of this command.';
 				}
 
-				const embed = new MessageEmbed()
+				const embed = new EmbedBuilder()
 					.setColor('#7289DA')
 					.setTitle(command)
 					.setDescription(des)

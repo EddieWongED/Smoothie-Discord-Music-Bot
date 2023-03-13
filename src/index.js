@@ -1,4 +1,4 @@
-const { Client, Collection, Intents } = require('discord.js');
+const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const { getFiles } = require('./utils/getFiles.js');
 const { connectDB, importFromDBToLocalJSON } = require('./mongoDB.js');
 const dotenv = require('dotenv');
@@ -56,9 +56,10 @@ getFiles('./src/commands')
 // Setting up intents
 const client = new Client({
 	intents: [
-		Intents.FLAGS.GUILDS,
-		Intents.FLAGS.GUILD_MESSAGES,
-		Intents.FLAGS.GUILD_VOICE_STATES,
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildVoiceStates,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent,
 	],
 });
 

@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageActionRow, MessageButton } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const {
 	neturalEmbed,
 	errorEmbed,
@@ -59,13 +59,13 @@ module.exports = {
 			return;
 		}
 
-		const testButton = new MessageButton()
+		const testButton = new ButtonBuilder()
 			.setCustomId('testButton')
 			.setLabel('Test')
-			.setStyle('PRIMARY')
+			.setStyle('Primary')
 			.setDisabled(false);
 
-		const row = new MessageActionRow().addComponents(testButton);
+		const row = new ActionRowBuilder().addComponents(testButton);
 
 		let embed = neturalEmbed('Hi Eddie', 'This is a test command.');
 		const mainMessage = await interaction

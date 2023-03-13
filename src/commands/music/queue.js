@@ -1,4 +1,4 @@
-const { MessageActionRow, MessageButton } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const {
 	loadingEmbed,
@@ -88,43 +88,43 @@ module.exports = {
 
 		const tempQueue = await retrieveData(interaction.guildId, 'queue');
 
-		const firstPageButton = new MessageButton()
+		const firstPageButton = new ButtonBuilder()
 			.setCustomId('queueFirstPage')
 			.setLabel('First Page')
-			.setStyle('DANGER')
+			.setStyle('Danger')
 			.setDisabled(true);
 
-		const prevPageButton = new MessageButton()
+		const prevPageButton = new ButtonBuilder()
 			.setCustomId('queuePrevPage')
 			.setLabel('Previous Page')
-			.setStyle('PRIMARY')
+			.setStyle('Primary')
 			.setDisabled(true);
 
-		const nextPageButton = new MessageButton()
+		const nextPageButton = new ButtonBuilder()
 			.setCustomId('queueNextPage')
 			.setLabel('Next Page')
-			.setStyle('PRIMARY')
+			.setStyle('Primary')
 			.setDisabled(Math.ceil(tempQueue.length / 10) === 1);
 
-		const lastPageButton = new MessageButton()
+		const lastPageButton = new ButtonBuilder()
 			.setCustomId('queueLastPage')
 			.setLabel('Last Page')
-			.setStyle('DANGER')
+			.setStyle('Danger')
 			.setDisabled(Math.ceil(tempQueue.length / 10) === 1);
 
-		const choosePageButton = new MessageButton()
+		const choosePageButton = new ButtonBuilder()
 			.setCustomId('queueChoosePage')
 			.setLabel('#')
-			.setStyle('SUCCESS')
+			.setStyle('Success')
 			.setDisabled(Math.ceil(tempQueue.length / 10) === 1);
 
-		const shuffleButton = new MessageButton()
+		const shuffleButton = new ButtonBuilder()
 			.setCustomId('shuffleButton')
 			.setLabel('Shuffle')
-			.setStyle('SECONDARY')
+			.setStyle('Secondary')
 			.setDisabled(false);
 
-		const row = new MessageActionRow().addComponents(
+		const row = new ActionRowBuilder().addComponents(
 			firstPageButton,
 			prevPageButton,
 			nextPageButton,
@@ -132,7 +132,7 @@ module.exports = {
 			choosePageButton
 		);
 
-		const row2 = new MessageActionRow().addComponents(shuffleButton);
+		const row2 = new ActionRowBuilder().addComponents(shuffleButton);
 
 		const message = await editReply(
 			args,

@@ -1,3 +1,4 @@
+# :warning: This repository is no longer maintained. The rewritten version of this bot is [here](https://github.com/EddieWongED/Smoothie) :warning:
 # Smoothie - a discord music bot :musical_note:
 
 A discord music bot that uses discord.js v13 to program. Support both Spotify and Youtube. Only suitable for a guild with a small group of friends.

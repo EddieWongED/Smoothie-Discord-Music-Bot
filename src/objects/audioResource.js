@@ -43,9 +43,9 @@ const getFirstAudioResource = async (guildId) => {
 
 const createAudioResource = async (guildId, url, title) => {
 	try {
-		const playStream = await stream(url);
+		const playStream = await stream(url, {discordPlayerCompatibility: true});
 		return (resource = voice.createAudioResource(playStream.stream, {
-			inputType: playStream.type,
+			inputType: voice.StreamType.Arbitrary,
 			metadata: {
 				title: title,
 				url: url,

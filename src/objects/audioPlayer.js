@@ -1,5 +1,5 @@
 const voice = require('@discordjs/voice');
-const { MessageActionRow, MessageButton } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const { isSameVoiceChannel } = require('../utils/isSameVoiceChannel.js');
 const {
 	getNextAudioResource,
@@ -49,25 +49,25 @@ const createAudioPlayer = async (guildId) => {
 					}
 				}
 
-				const playNextButton = new MessageButton()
+				const playNextButton = new ButtonBuilder()
 					.setCustomId('playNextButton')
 					.setLabel('Next Song')
-					.setStyle('SUCCESS')
+					.setStyle('Success')
 					.setDisabled(false);
 
-				const descriptionButton = new MessageButton()
+				const descriptionButton = new ButtonBuilder()
 					.setCustomId('descriptionButton')
 					.setLabel('Description')
-					.setStyle('DANGER')
+					.setStyle('Danger')
 					.setDisabled(false);
 
-				const queueButton = new MessageButton()
+				const queueButton = new ButtonBuilder()
 					.setCustomId('queueButton')
 					.setLabel('Queue')
-					.setStyle('PRIMARY')
+					.setStyle('Primary')
 					.setDisabled(false);
 
-				const row = new MessageActionRow().addComponents(
+				const row = new ActionRowBuilder().addComponents(
 					playNextButton,
 					descriptionButton,
 					queueButton
@@ -215,6 +215,11 @@ const createAudioPlayer = async (guildId) => {
 		);
 	});
 
+	player.on(voice.AudioPlayerStatus.AutoPaused, (obj) => {
+		console.log(
+			`${client.guilds.cache.get(guildId).name}: Music has been autopaused.`
+		);
+	});
 	cacheData['player'][guildId] = player;
 
 	return player;

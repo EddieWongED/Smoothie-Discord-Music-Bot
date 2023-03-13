@@ -1,4 +1,4 @@
-const { MessageActionRow, MessageSelectMenu } = require('discord.js');
+const { ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const {
 	loadingEmbed,
@@ -31,7 +31,7 @@ module.exports = {
 
 		embed = await helpMainEmbed();
 
-		const selectMenu = new MessageSelectMenu()
+		const selectMenu = new StringSelectMenuBuilder()
 			.setCustomId('selectCategory')
 			.setPlaceholder('Pick a Category!')
 			.setMinValues(1)
@@ -66,7 +66,7 @@ module.exports = {
 			});
 		}
 
-		const row = new MessageActionRow().addComponents(selectMenu);
+		const row = new ActionRowBuilder().addComponents(selectMenu);
 
 		const message = await editReply(
 			args,
@@ -90,7 +90,7 @@ module.exports = {
 				case 'selectCategory':
 					embed = await helpCateEmbed(interaction.values[0]);
 
-					const commandSelectMenu = new MessageSelectMenu()
+					const commandSelectMenu = new StringSelectMenuBuilder()
 						.setCustomId('selectCommand')
 						.setPlaceholder('Pick a Command!')
 						.setMinValues(1)
@@ -103,7 +103,7 @@ module.exports = {
 						});
 					}
 
-					const commandRow = new MessageActionRow().addComponents(
+					const commandRow = new ActionRowBuilder().addComponents(
 						commandSelectMenu
 					);
 
